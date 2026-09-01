@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="${title} + ' · ViduraRvs'">ViduraRvs</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+
+<header class="site-header" th:fragment="header">
+    <div class="container header-inner">
+        <a class="brand" th:href="@{/}">
+            <span class="brand-mark">V</span>
+            <span class="brand-name">ViduraRvs</span>
+        </a>
+
+        <form class="search-form" th:action="@{/search}" method="get">
+            <input type="search" name="q" placeholder="Search technology, science, travel..."
+                   th:value="${query}" aria-label="Search articles"/>
+            <button type="submit">Search</button>
+        </form>
+
+        <nav class="top-nav">
+            <a th:href="@{/}" th:classappend="${heading == 'Latest posts'} ? ' active'">Home</a>
+            <a th:href="@{/about}">About</a>
+            <a th:if="${isAuthenticated}" th:href="@{/admin/dashboard}">Dashboard</a>
+            <form th:if="${isAuthenticated}" th:action="@{/logout}" method="post" class="inline-form">
+                <button type="submit" class="link-button">Log out</button>
+            </form>
+            <a th:unless="${isAuthenticated}" th:href="@{/login}">Admin login</a>
+        </nav>
+    </div>
+    <div class="container category-strip">
+        <a th:each="cat : ${navCategories}"
+           th:href="@{'/category/' + ${cat.slug}}"
+           th:text="${cat.name}"
+           th:classappend="${activeCategory != null and activeCategory.id == cat.id} ? ' active'">Category</a>
+    </div>
+</header>
+
+<footer class="site-footer" th:fragment="footer">
+    <div class="container footer-inner">
+        <p>
+            <strong>ViduraRvs</strong> &mdash; independent writing on technology, science, travel,
+            gaming, food, education, philosophy and the ideas shaping today's world.
+        </p>
+        <p class="muted">Built with Spring Boot, MySQL and a lot of curiosity.</p>
+    </div>
+</footer>
+
+</body>
+</html>

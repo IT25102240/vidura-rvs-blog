@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="~{fragments/layout :: head('Dashboard')}"></th:block>
+<body>
+<div th:replace="~{fragments/layout :: header}"></div>
+
+<main class="container">
+    <div th:replace="~{admin/fragments/admin-nav :: nav('dashboard')}"></div>
+
+    <h1 class="page-title" th:text="'Welcome back, ' + ${currentUser.fullName}">Dashboard</h1>
+    <p class="muted" th:text="${currentUser.isSuperAdmin()} ? 'Owner account' : 'Verified admin'">Role</p>
+
+    <section class="stat-grid">
+        <div class="stat-card">
+            <span class="stat-number" th:text="${myPostCount}">0</span>
+            <span class="stat-label">Your posts</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-number" th:text="${myViewCount}">0</span>
+            <span class="stat-label">Views on your posts</span>
+        </div>
+        <div class="stat-card" th:if="${sitePublishedCount != null}">
+            <span class="stat-number" th:text="${sitePublishedCount}">0</span>
+            <span class="stat-label">Published site-wide</span>
+        </div>
+        <div class="stat-card" th:if="${siteViewCount != null}">
+            <span class="stat-number" th:text="${siteViewCount}">0</span>
+            <span class="stat-label">Total site views</span>
+        </div>
+        <div class="stat-card" th:if="${activeAdminCount != null}">
+            <span class="stat-number" th:text="${activeAdminCount}">0</span>
+            <span class="stat-label">Active admins</span>
+        </div>
+    </section>
+
+    <section class="admin-section">
+        <h2>Your recent posts</h2>
+        <table class="admin-table" th:if="${!recentPosts.isEmpty()}">
+            <thead>
+            <tr><th>Title</th><th>Category</th><th>Status</th><th>Views</th><th>Published</th></tr>
+            </thead>
+            <tbody>
+            <tr th:each="post : ${recentPosts.content}">
+                <td><a th:href="@{'/post/' + ${post.slug}}" th:text="${post.title}">Title</a></td>
+                <td th:text="${post.category.name}">Category</td>
+                <td th:text="${post.published} ? 'Published' : 'Draft'">Status</td>
+                <td th:text="${post.viewCount}">0</td>
+                <td th:text="${#temporals.format(post.createdAt, 'dd MMM yyyy')}">date</td>
+            </tr>
+            </tbody>
+        </table>
+        <p th:if="${recentPosts.isEmpty()}" class="empty-state">You haven't published anything yet.</p>
+        <a th:href="@{/admin/posts/new}" class="button">Write a new post</a>
+    </section>
+
+    <section class="admin-section" th:if="${sitePosts != null}">
+        <h2>Site-wide activity</h2>
+        <table class="admin-table" th:if="${!sitePosts.isEmpty()}">
+            <thead>
+            <tr><th>Title</th><th>Author</th><th>Category</th><th>Views</th></tr>
+            </thead>
+            <tbody>
+            <tr th:each="post : ${sitePosts.content}">
+                <td><a th:href="@{'/post/' + ${post.slug}}" th:text="${post.title}">Title</a></td>
+                <td th:text="${post.author.fullName}">Author</td>
+                <td th:text="${post.category.name}">Category</td>
+                <td th:text="${post.viewCount}">0</td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+</main>
+
+<div th:replace="~{fragments/layout :: footer}"></div>
+</body>
+</html>

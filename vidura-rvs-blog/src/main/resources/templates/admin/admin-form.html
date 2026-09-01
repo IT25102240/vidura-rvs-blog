@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="~{fragments/layout :: head('Invite admin')}"></th:block>
+<body>
+<div th:replace="~{fragments/layout :: header}"></div>
+
+<main class="container narrow">
+    <div th:replace="~{admin/fragments/admin-nav :: nav('admins')}"></div>
+
+    <h1 class="page-title">Invite a new admin</h1>
+    <p class="muted">Give someone you trust the ability to publish on ViduraRvs. Share the temporary password with them securely and ask them to keep it safe - there is no self-service password reset yet.</p>
+
+    <form th:action="@{/admin/admins/new}" th:object="${adminForm}" method="post" class="stacked-form">
+        <label for="fullName">Full name</label>
+        <input id="fullName" type="text" th:field="*{fullName}"/>
+        <p class="field-error" th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}"></p>
+
+        <label for="username">Username</label>
+        <input id="username" type="text" th:field="*{username}"/>
+        <p class="field-error" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></p>
+
+        <label for="email">Email</label>
+        <input id="email" type="email" th:field="*{email}"/>
+        <p class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></p>
+
+        <label for="password">Temporary password</label>
+        <input id="password" type="password" th:field="*{password}"/>
+        <p class="field-error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></p>
+
+        <button type="submit">Grant admin access</button>
+    </form>
+</main>
+
+<div th:replace="~{fragments/layout :: footer}"></div>
+</body>
+</html>

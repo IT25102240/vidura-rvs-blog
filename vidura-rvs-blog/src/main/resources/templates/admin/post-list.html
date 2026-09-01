@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="~{fragments/layout :: head('Manage posts')}"></th:block>
+<body>
+<div th:replace="~{fragments/layout :: header}"></div>
+
+<main class="container">
+    <div th:replace="~{admin/fragments/admin-nav :: nav('posts')}"></div>
+
+    <div class="admin-header-row">
+        <h1 class="page-title">Posts</h1>
+        <a th:href="@{/admin/posts/new}" class="button">Write a new post</a>
+    </div>
+
+    <p class="form-success" th:if="${successMessage}" th:text="${successMessage}"></p>
+
+    <table class="admin-table" th:if="${!posts.isEmpty()}">
+        <thead>
+        <tr><th>Title</th><th>Category</th><th>Author</th><th>Status</th><th>Views</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="post : ${posts.content}">
+            <td><a th:href="@{'/post/' + ${post.slug}}" th:text="${post.title}">Title</a></td>
+            <td th:text="${post.category.name}">Category</td>
+            <td th:text="${post.author.fullName}">Author</td>
+            <td th:text="${post.published} ? 'Published' : 'Draft'">Status</td>
+            <td th:text="${post.viewCount}">0</td>
+            <td class="row-actions">
+                <a th:href="@{'/admin/posts/' + ${post.id} + '/edit'}">Edit</a>
+                <form th:action="@{'/admin/posts/' + ${post.id} + '/delete'}" method="post"
+                      onsubmit="return confirm('Delete this post permanently?');" class="inline-form">
+                    <button type="submit" class="link-button danger">Delete</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <p th:if="${posts.isEmpty()}" class="empty-state">No posts yet.</p>
+
+    <nav class="pagination" th:if="${posts.totalPages > 1}">
+        <a th:if="${posts.hasPrevious()}" th:href="@{/admin/posts(page=${posts.number - 1})}">&larr; Newer</a>
+        <span th:text="'Page ' + ${posts.number + 1} + ' of ' + ${posts.totalPages}"></span>
+        <a th:if="${posts.hasNext()}" th:href="@{/admin/posts(page=${posts.number + 1})}">Older &rarr;</a>
+    </nav>
+</main>
+
+<div th:replace="~{fragments/layout :: footer}"></div>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="~{fragments/layout :: head(${heading})}"></th:block>
+<body>
+<div th:replace="~{fragments/layout :: header}"></div>
+
+<main class="container">
+    <h1 class="page-title" th:text="${heading}">Latest posts</h1>
+
+    <p th:if="${query != null and posts.totalElements == 0}" class="empty-state">
+        No articles match "<span th:text="${query}"></span>" yet. Try another keyword.
+    </p>
+    <p th:if="${query == null and posts.totalElements == 0}" class="empty-state">
+        Nothing published in this section yet - check back soon.
+    </p>
+
+    <div class="post-grid">
+        <article class="post-card" th:each="post : ${posts.content}">
+            <a th:href="@{'/post/' + ${post.slug}}" class="post-card-media">
+                <img th:if="${post.hasCoverImage()}" th:src="@{'/uploads/' + ${post.coverImagePath}}"
+                     th:alt="${post.title}"/>
+                <div th:unless="${post.hasCoverImage()}" class="post-card-media placeholder"
+                     th:text="${#strings.substring(post.category.name, 0, 1)}">T</div>
+            </a>
+            <div class="post-card-body">
+                <a th:href="@{'/category/' + ${post.category.slug}}" class="tag-pill" th:text="${post.category.name}">Category</a>
+                <h2><a th:href="@{'/post/' + ${post.slug}}" th:text="${post.title}">Title</a></h2>
+                <p class="post-summary" th:text="${post.summary}">Summary</p>
+                <p class="post-meta">
+                    <span th:text="${#temporals.format(post.createdAt, 'dd MMM yyyy')}">date</span>
+                    &middot; <span th:text="${post.author.fullName}">author</span>
+                    &middot; <span th:text="${post.viewCount} + ' views'">views</span>
+                </p>
+            </div>
+        </article>
+    </div>
+
+    <nav class="pagination" th:if="${posts.totalPages > 1}">
+        <a th:if="${posts.hasPrevious()}"
+           th:href="@{${activeCategory != null ? '/category/' + activeCategory.slug : (query != null ? '/search' : '/')}(q=${query}, page=${posts.number - 1})}">&larr; Newer</a>
+        <span th:text="'Page ' + ${posts.number + 1} + ' of ' + ${posts.totalPages}"></span>
+        <a th:if="${posts.hasNext()}"
+           th:href="@{${activeCategory != null ? '/category/' + activeCategory.slug : (query != null ? '/search' : '/')}(q=${query}, page=${posts.number + 1})}">Older &rarr;</a>
+    </nav>
+</main>
+
+<div th:replace="~{fragments/layout :: footer}"></div>
+</body>
+</html>

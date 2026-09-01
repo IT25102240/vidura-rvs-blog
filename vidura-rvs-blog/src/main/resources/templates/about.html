@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="~{fragments/layout :: head('About')}"></th:block>
+<body>
+<div th:replace="~{fragments/layout :: header}"></div>
+
+<main class="container narrow">
+    <h1 class="page-title">About ViduraRvs</h1>
+
+    <p>
+        ViduraRvs is an independent blog covering technology, science, travel, gaming, food,
+        education, philosophy, and the ideas shaping today's world. It's written and curated by
+        its owner, along with a small circle of invited, verified contributors.
+    </p>
+
+    <p>
+        There are no public sign-ups here. Every article is written by the owner or by an admin
+        who has been personally invited to join &mdash; so what you read is always accountable to
+        a real name, not an anonymous crowd.
+    </p>
+
+    <p>
+        Have a suggestion, correction, or just want to say hello? Reach out through the contact
+        details on the owner's profile, or leave feedback the old-fashioned way &mdash; by talking
+        to someone who reads this blog.
+    </p>
+</main>
+
+<div th:replace="~{fragments/layout :: footer}"></div>
+</body>
+</html>

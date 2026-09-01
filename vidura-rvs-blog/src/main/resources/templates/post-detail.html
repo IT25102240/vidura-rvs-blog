@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="~{fragments/layout :: head(${post.title})}"></th:block>
+<body>
+<div th:replace="~{fragments/layout :: header}"></div>
+
+<main class="container narrow">
+    <article class="post-full">
+        <a th:href="@{'/category/' + ${post.category.slug}}" class="tag-pill" th:text="${post.category.name}">Category</a>
+        <h1 th:text="${post.title}">Title</h1>
+        <p class="post-meta">
+            By <strong th:text="${post.author.fullName}">Author</strong>
+            &middot; <span th:text="${#temporals.format(post.createdAt, 'dd MMMM yyyy')}">date</span>
+            &middot; <span th:text="${post.viewCount} + ' views'">views</span>
+        </p>
+
+        <img th:if="${post.hasCoverImage()}" class="post-cover" th:src="@{'/uploads/' + ${post.coverImagePath}}"
+             th:alt="${post.title}"/>
+
+        <div class="video-embed" th:if="${post.hasVideo()}">
+            <iframe th:src="'https://www.youtube.com/embed/' + ${post.youtubeVideoId}"
+                    title="Embedded YouTube video" frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen></iframe>
+        </div>
+
+        <div class="post-content" th:utext="${post.content}">Content</div>
+
+        <p class="post-tags" th:if="${post.tags != null and !post.tags.isBlank()}">
+            <span th:each="tag : ${#strings.arraySplit(post.tags, ',')}" class="tag-pill muted" th:text="${#strings.trim(tag)}">tag</span>
+        </p>
+    </article>
+
+    <section class="related-posts" th:if="${!relatedPosts.isEmpty()}">
+        <h2 th:text="'More in ' + ${post.category.name}">More</h2>
+        <ul>
+            <li th:each="related : ${relatedPosts.content}">
+                <a th:href="@{'/post/' + ${related.slug}}" th:text="${related.title}">Related title</a>
+            </li>
+        </ul>
+    </section>
+</main>
+
+<div th:replace="~{fragments/layout :: footer}"></div>
+</body>
+</html>

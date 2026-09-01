@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="~{fragments/layout :: head(${isNew} ? 'Write a post' : 'Edit post')}"></th:block>
+<body>
+<div th:replace="~{fragments/layout :: header}"></div>
+
+<main class="container narrow">
+    <div th:replace="~{admin/fragments/admin-nav :: nav('posts')}"></div>
+
+    <h1 class="page-title" th:text="${isNew} ? 'Write a new post' : 'Edit post'">Post form</h1>
+
+    <form th:action="${isNew} ? @{/admin/posts/new} : @{'/admin/posts/' + ${postForm.id} + '/edit'}"
+          th:object="${postForm}" method="post" enctype="multipart/form-data" class="stacked-form">
+
+        <label for="title">Title</label>
+        <input id="title" type="text" th:field="*{title}"/>
+        <p class="field-error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></p>
+
+        <label for="categoryId">Category</label>
+        <select id="categoryId" th:field="*{categoryId}">
+            <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}">Category</option>
+        </select>
+        <p class="field-error" th:if="${#fields.hasErrors('categoryId')}" th:errors="*{categoryId}"></p>
+
+        <label for="summary">Summary (shown in listings)</label>
+        <textarea id="summary" rows="2" th:field="*{summary}"></textarea>
+        <p class="field-error" th:if="${#fields.hasErrors('summary')}" th:errors="*{summary}"></p>
+
+        <label for="content">Content</label>
+        <textarea id="content" rows="16" th:field="*{content}"></textarea>
+        <p class="field-hint">Plain text or basic HTML (e.g. &lt;p&gt;, &lt;b&gt;, &lt;img&gt;) - only verified admins can write here.</p>
+        <p class="field-error" th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></p>
+
+        <label for="tags">Tags (comma separated, used for search)</label>
+        <input id="tags" type="text" th:field="*{tags}" placeholder="e.g. java, springboot, backend"/>
+
+        <label for="youtubeVideoId">YouTube video ID (optional)</label>
+        <input id="youtubeVideoId" type="text" th:field="*{youtubeVideoId}" placeholder="e.g. dQw4w9WgXcQ"/>
+        <p class="field-hint">Just the ID from the video URL after "v=", not the whole link.</p>
+
+        <label for="coverImage">Cover image (optional)</label>
+        <img th:if="${existingPost != null and existingPost.hasCoverImage()}"
+             th:src="@{'/uploads/' + ${existingPost.coverImagePath}}" class="current-cover-preview" alt="Current cover"/>
+        <input id="coverImage" type="file" th:field="*{coverImage}" accept="image/*"/>
+        <label class="checkbox-row" th:if="${existingPost != null and existingPost.hasCoverImage()}">
+            <input type="checkbox" th:field="*{removeCoverImage}"/> Remove current cover image
+        </label>
+
+        <label class="checkbox-row">
+            <input type="checkbox" th:field="*{published}"/> Published (visible to visitors)
+        </label>
+
+        <button type="submit" th:text="${isNew} ? 'Publish' : 'Save changes'">Save</button>
+    </form>
+</main>
+
+<div th:replace="~{fragments/layout :: footer}"></div>
+</body>
+</html>

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="~{fragments/layout :: head('Admin login')}"></th:block>
+<body>
+<div th:replace="~{fragments/layout :: header}"></div>
+
+<main class="container narrow">
+    <div class="auth-card">
+        <h1>Admin login</h1>
+        <p class="muted">For ViduraRvs' verified writers and the site owner. Visitors don't need an account to read.</p>
+
+        <p class="form-error" th:if="${param.error}">Incorrect username or password.</p>
+        <p class="form-success" th:if="${param.logout}">You've been logged out.</p>
+
+        <form th:action="@{/login}" method="post" class="stacked-form">
+            <label for="username">Username</label>
+            <input id="username" type="text" name="username" required autofocus/>
+
+            <label for="password">Password</label>
+            <input id="password" type="password" name="password" required/>
+
+            <button type="submit">Log in</button>
+        </form>
+    </div>
+</main>
+
+<div th:replace="~{fragments/layout :: footer}"></div>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="~{fragments/layout :: head('Manage admins')}"></th:block>
+<body>
+<div th:replace="~{fragments/layout :: header}"></div>
+
+<main class="container">
+    <div th:replace="~{admin/fragments/admin-nav :: nav('admins')}"></div>
+
+    <div class="admin-header-row">
+        <h1 class="page-title">Verified admins</h1>
+        <a th:href="@{/admin/admins/new}" class="button">Invite a new admin</a>
+    </div>
+
+    <p class="form-success" th:if="${successMessage}" th:text="${successMessage}"></p>
+
+    <table class="admin-table">
+        <thead>
+        <tr><th>Name</th><th>Username</th><th>Email</th><th>Role</th><th>Status</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="admin : ${admins}">
+            <td th:text="${admin.fullName}">Name</td>
+            <td th:text="${admin.username}">username</td>
+            <td th:text="${admin.email}">email</td>
+            <td th:text="${admin.role}">Role</td>
+            <td th:text="${admin.active} ? 'Active' : 'Revoked'">Status</td>
+            <td class="row-actions">
+                <form th:unless="${admin.isSuperAdmin()}"
+                      th:action="@{'/admin/admins/' + ${admin.id} + (${admin.active} ? '/deactivate' : '/activate')}"
+                      method="post" class="inline-form">
+                    <button type="submit" class="link-button" th:text="${admin.active} ? 'Revoke access' : 'Restore access'"></button>
+                </form>
+                <span th:if="${admin.isSuperAdmin()}" class="muted">Owner</span>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</main>
+
+<div th:replace="~{fragments/layout :: footer}"></div>
+</body>
+</html>
