@@ -31,8 +31,8 @@ public class UserServiceImpl implements UserService {
     private final Path uploadRoot;
 
     public UserServiceImpl(UserRepository userRepository,
-                           PasswordEncoder passwordEncoder,
-                           @Value("${app.upload.dir:uploads}") String uploadDir) {
+            PasswordEncoder passwordEncoder,
+            @Value("${app.upload.dir:uploads}") String uploadDir) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.uploadRoot = Path.of(uploadDir);
@@ -121,7 +121,8 @@ public class UserServiceImpl implements UserService {
                     file.getOriginalFilename() == null ? "photo" : file.getOriginalFilename());
             String ext = "";
             int dot = original.lastIndexOf('.');
-            if (dot >= 0) ext = original.substring(dot);
+            if (dot >= 0)
+                ext = original.substring(dot);
             String name = "profile-" + UUID.randomUUID() + ext;
             Files.copy(file.getInputStream(), uploadRoot.resolve(name), StandardCopyOption.REPLACE_EXISTING);
             return name;
