@@ -5,7 +5,7 @@
 **Project:** ViduraRvs personal blogging platform  
 **Technology:** Java 21 bytecode (JDK 24 runtime), Spring Boot 3.2.5, MySQL 8, Thymeleaf, Spring Security, Quill.js, Maven  
 **Application package:** `com.vidurarvs.blog`  
-**Last updated:** 3 September 2026  
+**Last updated:** 3 September 2026 (category management added)  
 **Purpose:** BSE IT/SO module project demonstrating Java OOP, layered architecture, and SOLID principles
 
 > **Security note:** This report contains no real passwords, private SSH keys, or credentials.

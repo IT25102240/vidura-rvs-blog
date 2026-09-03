@@ -3,8 +3,9 @@
 <body>
 <nav class="admin-nav" th:fragment="nav(active)">
     <a th:href="@{/admin/dashboard}" th:classappend="${active == 'dashboard'} ? ' active'">📊 Dashboard</a>
-    <a th:href="@{/admin/posts}" th:classappend="${active == 'posts'} ? ' active'">📝 Posts</a>
-    <a th:href="@{/admin/profile}" th:classappend="${active == 'profile'} ? ' active'">👤 My Profile</a>
+    <a th:href="@{/admin/posts}"     th:classappend="${active == 'posts'}     ? ' active'">📝 Posts</a>
+    <a th:href="@{/admin/categories}" th:classappend="${active == 'categories'} ? ' active'">🏷️ Categories</a>
+    <a th:href="@{/admin/profile}"   th:classappend="${active == 'profile'}   ? ' active'">👤 My Profile</a>
     <a sec:authorize="hasRole('SUPER_ADMIN')" th:href="@{/admin/admins}"
        th:classappend="${active == 'admins'} ? ' active'">👥 Manage admins</a>
     <a th:href="@{/}" target="_blank">🌐 View site</a>

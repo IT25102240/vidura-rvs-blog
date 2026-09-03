@@ -31,6 +31,8 @@ public class SecurityConfig {
                         .requestMatchers("/", "/post/**", "/category/**", "/search", "/about",
                                 "/author/**", "/css/**", "/js/**", "/img/**", "/uploads/**", "/login").permitAll()
                         .requestMatchers("/admin/admins/**").hasRole("SUPER_ADMIN")
+                        .requestMatchers("/admin/categories/*/delete",
+                                         "/admin/categories/add").hasRole("SUPER_ADMIN")
                         .requestMatchers("/admin/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
                         .anyRequest().permitAll()
                 )

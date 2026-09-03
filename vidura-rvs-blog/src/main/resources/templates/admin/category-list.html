@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Manage Categories — ViduraRvs Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"/>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <style>
+        /* ── Page-specific overrides ───────────────────────────── */
+        .cat-page { max-width: 800px; margin: 0 auto; }
+
+        .cat-grid {
+            display: grid;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+
+        .cat-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--card-bg, rgba(255,255,255,.05));
+            border: 1px solid var(--border, rgba(255,255,255,.08));
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            transition: border-color .2s;
+        }
+        .cat-row:hover { border-color: rgba(129,140,248,.4); }
+
+        .cat-info { display: flex; flex-direction: column; gap: .2rem; }
+        .cat-name  { font-weight: 600; font-size: 1rem; }
+        .cat-slug  { font-size: .78rem; color: var(--text-muted, #94a3b8);
+                     font-family: monospace; }
+        .cat-posts { font-size: .8rem; color: #6366f1; font-weight: 500; }
+
+        .cat-actions { display: flex; gap: .5rem; align-items: center; }
+
+        /* Add-category card */
+        .add-card {
+            background: linear-gradient(135deg,
+                rgba(99,102,241,.12), rgba(168,85,247,.08));
+            border: 1px dashed rgba(129,140,248,.4);
+            border-radius: 16px;
+            padding: 1.75rem;
+            margin-bottom: 2rem;
+        }
+        .add-card h3 { margin: 0 0 1rem; font-size: 1rem; }
+        .add-row { display: flex; gap: .75rem; flex-wrap: wrap; }
+        .add-row input[type="text"] {
+            flex: 1; min-width: 220px;
+            padding: .65rem 1rem;
+            border-radius: 10px;
+            border: 1px solid rgba(129,140,248,.35);
+            background: rgba(255,255,255,.06);
+            color: inherit;
+            font-size: .95rem;
+            outline: none;
+            transition: border-color .2s;
+        }
+        .add-row input[type="text"]:focus {
+            border-color: #818cf8;
+        }
+
+        .btn-add {
+            padding: .65rem 1.4rem;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity .2s, transform .15s;
+        }
+        .btn-add:hover { opacity: .88; transform: translateY(-1px); }
+
+        .btn-del {
+            padding: .45rem .9rem;
+            background: rgba(239,68,68,.12);
+            color: #f87171;
+            border: 1px solid rgba(239,68,68,.25);
+            border-radius: 8px;
+            font-size: .82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background .2s, border-color .2s;
+        }
+        .btn-del:hover {
+            background: rgba(239,68,68,.22);
+            border-color: #f87171;
+        }
+
+        .badge-posts {
+            padding: .25rem .65rem;
+            border-radius: 20px;
+            font-size: .75rem;
+            font-weight: 600;
+        }
+        .badge-has  { background: rgba(99,102,241,.15); color: #818cf8; }
+        .badge-none { background: rgba(148,163,184,.1); color: #64748b; }
+
+        /* Alert messages */
+        .alert-success, .alert-error {
+            padding: .85rem 1.25rem;
+            border-radius: 10px;
+            margin-bottom: 1.25rem;
+            font-weight: 500;
+        }
+        .alert-success { background: rgba(34,197,94,.12);
+                         border: 1px solid rgba(34,197,94,.25); color: #4ade80; }
+        .alert-error   { background: rgba(239,68,68,.12);
+                         border: 1px solid rgba(239,68,68,.25); color: #f87171; }
+
+        .lock-notice {
+            display: flex; align-items: center; gap: .5rem;
+            font-size: .82rem; color: var(--text-muted, #94a3b8);
+            background: rgba(255,255,255,.03);
+            border: 1px solid rgba(255,255,255,.06);
+            border-radius: 8px; padding: .55rem .9rem;
+        }
+    </style>
+</head>
+<body>
+
+<div th:replace="~{admin/fragments/admin-nav :: nav('categories')}"></div>
+
+<main class="admin-main">
+    <div class="cat-page">
+
+        <!-- Header -->
+        <div class="page-header" style="margin-bottom:1.5rem;">
+            <h1 style="font-size:1.75rem; margin:0 0 .3rem;">🏷️ Manage Categories</h1>
+            <p style="color:var(--text-muted,#94a3b8); margin:0;">
+                Add new topics or remove unused ones. Categories with posts cannot be deleted.
+            </p>
+        </div>
+
+        <!-- Flash messages -->
+        <div th:if="${successMsg}" class="alert-success" th:text="${successMsg}"></div>
+        <div th:if="${errorMsg}"   class="alert-error"   th:text="${errorMsg}"></div>
+
+        <!-- ── Add category (SUPER_ADMIN only) ──────────────────── -->
+        <div sec:authorize="hasRole('SUPER_ADMIN')" class="add-card">
+            <h3>➕ Add a new category</h3>
+            <form th:action="@{/admin/categories/add}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <div class="add-row">
+                    <input type="text" name="name" placeholder="e.g. Music, Culture, AI …"
+                           maxlength="80" autocomplete="off" required/>
+                    <button type="submit" class="btn-add">Add Category</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- ── Category list ──────────────────────────────────────── -->
+        <div th:if="${#lists.isEmpty(categories)}"
+             style="text-align:center; padding:3rem; color:var(--text-muted,#94a3b8);">
+            No categories yet. Add one above.
+        </div>
+
+        <div class="cat-grid" th:unless="${#lists.isEmpty(categories)}">
+            <div class="cat-row" th:each="cat : ${categories}">
+
+                <div class="cat-info">
+                    <span class="cat-name" th:text="${cat.name}">Category Name</span>
+                    <span class="cat-slug" th:text="'/category/' + ${cat.slug}">/category/slug</span>
+                </div>
+
+                <div class="cat-actions">
+                    <!-- Link to the public category page -->
+                    <a th:href="@{/category/{slug}(slug=${cat.slug})}"
+                       target="_blank"
+                       style="font-size:.82rem; color:#818cf8; text-decoration:none;">
+                        🔗 View
+                    </a>
+
+                    <!-- Delete button — SUPER_ADMIN only -->
+                    <div sec:authorize="hasRole('SUPER_ADMIN')">
+                        <form th:action="@{/admin/categories/{id}/delete(id=${cat.id})}"
+                              method="post"
+                              onsubmit="return confirmDelete(this)">
+                            <input type="hidden"
+                                   th:name="${_csrf.parameterName}"
+                                   th:value="${_csrf.token}"/>
+                            <button type="submit" class="btn-del"
+                                    th:attr="data-name=${cat.name}">🗑 Delete</button>
+                        </form>
+                    </div>
+
+                    <!-- Info badge for regular admins -->
+                    <div sec:authorize="!hasRole('SUPER_ADMIN')" class="lock-notice">
+                        🔒 Owner only
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer note -->
+        <p style="margin-top:2rem; font-size:.8rem; color:var(--text-muted,#94a3b8);">
+            💡 <strong>Tip:</strong> You cannot delete a category that has posts assigned to it.
+            Reassign or delete those posts first, then delete the category.
+        </p>
+
+    </div><!-- /cat-page -->
+</main>
+
+<script>
+function confirmDelete(form) {
+    const name = form.querySelector('[data-name]').getAttribute('data-name');
+    return confirm('Delete the category "' + name + '"?\n\nThis cannot be undone. Any posts using this category must be reassigned first.');
+}
+</script>
+</body>
+</html>

@@ -1,124 +1,169 @@
 # ViduraRvs
 
-A personal blog platform built with Spring Boot + MySQL, so you can publish long-form
-articles on technology, science, travel, gaming, food, education, philosophy, ICT,
-programming and anything else on your mind — and invite trusted people as verified
-admins to publish alongside you.
+A personal blog platform built with **Spring Boot + MySQL** for publishing long-form articles
+on any topic — and inviting trusted people as admins to publish alongside you.
 
-This project was generated as source code for you to run, debug and extend yourself
-in **IntelliJ IDEA**. It does not run inside this online workspace — follow the steps
-below on your own machine.
+**Live at:** `https://vidurarvs.duckdns.org` *(after deployment)*
+
+---
 
 ## What you get
 
-- **Public site** — anyone can browse the latest posts, filter by category, and
-  search by keyword. Newest posts always show first.
-- **Admin accounts** — you (the `SUPER_ADMIN`/owner) can invite other people as
-  `ADMIN`s. Admins can write, edit and delete their own posts; you can edit/delete
-  any post and revoke admin access at any time.
-- **Dashboard** — every admin sees their own post count and view count; you (the
-  owner) also see site-wide totals.
-- **Rich posts** — cover image upload, one embedded YouTube video per post, tags for
-  search, and a content field that supports basic HTML if you want extra formatting.
-- **MySQL storage** — all posts, categories, admin accounts and view counts persist
-  in a real relational database via Spring Data JPA/Hibernate.
+| Feature | Details |
+|---|---|
+| 🌐 **Public site** | Browse, filter by category, search by keyword |
+| ✍️ **Quill rich-text editor** | Bold, headings H1-H3, italic, lists, code blocks, links |
+| 🖼️ **Up to 5 images per post** | Gallery + click-to-open lightbox |
+| 📺 **YouTube smart embed** | Paste any YouTube URL, short link, embed code, or bare ID |
+| 💾 **Auto-save drafts** | Saves every 4 s to localStorage; restored on return |
+| 👁️ **Hide/Show toggle** | Publish or draft posts without opening the edit form |
+| 🏷️ **Category management** | Owner can add/delete categories from the admin panel |
+| 👤 **Author profiles** | Public page at `/author/{username}` with bio + photo |
+| 📊 **Dashboard** | Personal stats; owner sees site-wide totals |
+| 🔒 **Role-based security** | SUPER_ADMIN owns everything; ADMIN manages own posts |
+
+---
 
 ## Tech stack
 
-| Layer      | Choice                                    |
-|------------|--------------------------------------------|
-| Backend    | Java 17, Spring Boot 3 (Web, Security, Data JPA, Validation) |
-| Frontend   | Server-rendered HTML with Thymeleaf, plain CSS (no JS framework) |
-| Database   | MySQL 8 |
-| Build tool | Maven |
+| Layer | Choice |
+|---|---|
+| Backend | Java 21 (bytecode) / JDK 24 runtime, Spring Boot 3.2.5 |
+| Frontend | Thymeleaf server-rendered HTML, custom dark CSS, Quill.js |
+| Database | MySQL 8 (utf8mb4) |
+| Build | Maven 3.8.5, maven-compiler-plugin 3.13.0 |
+| Lombok | 1.18.38 (Java 24 compatible) |
+| Hosting | Oracle Cloud Always Free Arm A1, Nginx, Let's Encrypt |
 
-See `ARCHITECTURE.md` for how the code is organized and why (OOP/SOLID notes for
-your SE module).
+See [`ARCHITECTURE.md`](ARCHITECTURE.md) for the full layered architecture and SOLID analysis.
 
-## 1. Prerequisites
+---
 
-- **JDK 17+** (Temurin, OpenJDK, or any distro)
-- **Maven** (or use IntelliJ's bundled Maven — no separate install needed)
-- **MySQL 8** running locally (MySQL Community Server + MySQL Workbench, or via
-  XAMPP/WAMP, or Docker: `docker run --name vidurarvs-mysql -e MYSQL_ROOT_PASSWORD=yourpassword -p 3306:3306 -d mysql:8`)
+## 1. Prerequisites (local dev)
+
+- **JDK 21+** (Java 24 also works — bytecode targets Java 21)
+- **Maven** (or use IntelliJ's bundled Maven)
+- **MySQL 8** running locally
 - **IntelliJ IDEA** (Community edition is enough)
-- **Git** installed and a GitHub (or similar) account, for pushing your progress
+- **Git**
+
+---
 
 ## 2. Configure the database
 
-1. Start MySQL and create the database (or let the app do it — the connection
-   string already includes `createDatabaseIfNotExist=true`).
-2. Open `src/main/resources/application.properties` and set your real MySQL
-   username/password:
+Create the database and a dedicated user:
 
-   ```properties
-   spring.datasource.username=root
-   spring.datasource.password=your-real-password
-   ```
+```sql
+CREATE DATABASE vidurarvs_blog
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;
 
-3. (Optional but recommended) Change the bootstrap owner account before your
-   first run:
-
-   ```properties
-   app.bootstrap.super-admin.username=your-username
-   app.bootstrap.super-admin.password=SomethingStrong123!
-   ```
-
-   This account is created automatically the very first time the app starts
-   (only if the `users` table is empty), so this is how you get your own
-   login. Change the password again from a real UI later — this project
-   doesn't include a self-service password change screen yet, so if you want
-   one, that's a great first extension to build yourself.
-
-## 3. Open and run in IntelliJ
-
-1. `File > Open...` and select the `vidura-rvs-blog` folder (this one). IntelliJ
-   will detect the `pom.xml` and import it as a Maven project automatically —
-   wait for indexing/dependency download to finish.
-2. Open `src/main/java/com/vidurarvs/blog/BlogApplication.java`.
-3. Click the green ▶ run icon next to `public static void main`, or right-click
-   the file and choose **Run 'BlogApplication'**.
-4. Watch the "Run" console — on first successful start you'll see a banner with
-   your generated owner username, and the app listening on port 8080.
-5. Open **http://localhost:8080** in any browser. That's your live blog, running
-   entirely on your own machine.
-6. Go to **http://localhost:8080/login** and sign in with the owner account from
-   `application.properties` to reach `/admin/dashboard` and start writing.
-
-If the run fails with a MySQL connection error, double check MySQL is running
-and the credentials in `application.properties` are correct.
-
-## 4. Try the core flows before moving on
-
-- Publish a post from `/admin/posts/new` with a cover image and a YouTube ID.
-- Confirm it appears on the home page, under its category, and shows up when
-  you search for one of its tags.
-- From `/admin/admins`, invite a second admin account, log out, and log back in
-  as that admin to confirm they can publish but can't see "Manage admins".
-- Confirm an admin can't edit/delete another admin's post (try changing the URL
-  to another author's post id — you should get a 403 page, not the edit form).
-
-## 5. Save your progress with Git
-
-From the project root, in IntelliJ's terminal (or your own terminal):
-
-```bash
-git init
-git add .
-git commit -m "Initial commit: ViduraRvs blog platform"
+CREATE USER 'vidura_blog'@'localhost' IDENTIFIED BY '<strong-password>';
+GRANT ALL PRIVILEGES ON vidurarvs_blog.* TO 'vidura_blog'@'localhost';
+FLUSH PRIVILEGES;
 ```
 
-Create an empty repository on GitHub (or GitLab/Bitbucket) named e.g.
-`vidura-rvs-blog`, **without** a README/license (to avoid merge conflicts with
-what you already committed), then:
+Open `src/main/resources/application.properties` and update:
 
-```bash
-git remote add origin https://github.com/<your-username>/vidura-rvs-blog.git
-git branch -M main
-git push -u origin main
+```properties
+spring.datasource.username=vidura_blog
+spring.datasource.password=<strong-password>
+
+app.bootstrap.super-admin.username=your-username
+app.bootstrap.super-admin.password=SomethingStrong123!
 ```
 
-From then on, after each meaningful change:
+The super-admin account is created automatically on **first start only** (if the `users` table
+is empty). Change the password from the admin panel afterwards.
+
+---
+
+## 3. Run the DB migration (if upgrading from an older version)
+
+If you already have an existing `vidurarvs_blog` database, run this once:
+
+```bash
+# From MySQL:
+source src/main/resources/db-migration.sql
+```
+
+This adds `profile_picture_path`, `bio` to the `users` table and creates the `post_images`
+table. It is safe to run multiple times (uses `IF NOT EXISTS`).
+
+---
+
+## 4. Open and run in IntelliJ
+
+1. `File → Open` → select the `vidura-rvs-blog` folder. IntelliJ imports it as a Maven project.
+2. Open `BlogApplication.java` → click ▶ Run.
+3. Open **http://localhost:8080** in your browser.
+4. Go to **http://localhost:8080/login** to sign in as owner.
+
+---
+
+## 5. Admin features walkthrough
+
+### Writing a post
+
+1. Go to **Posts → Write new post**.
+2. Use the **Quill editor** toolbar — bold (Ctrl+B), Heading 2, bullet list, code block.
+3. Upload up to **5 images** — drag or click the image slots. First image = cover.
+4. Paste any YouTube URL into the YouTube field (full URL, short link, or embed code).
+5. Click **Save Draft** or **Publish**.
+
+Auto-save kicks in every 4 seconds. If you close the tab accidentally, reopen the new-post
+form and click **Restore draft** when prompted.
+
+### Managing categories
+
+Go to **🏷️ Categories** in the admin nav.
+
+- **All admins** can view the category list.
+- **Owner (SUPER_ADMIN) only** can add new categories or delete unused ones.
+- Categories with posts assigned **cannot be deleted** — reassign or delete those posts first.
+
+### Profile page
+
+Go to **👤 My Profile** — upload your photo and write a short bio.
+Your public author page will be available at `/author/{your-username}`.
+
+---
+
+## 6. Project structure
+
+```
+src/main/java/com/vidurarvs/blog/
+  controller/   HTTP endpoints (public site + admin area + categories)
+  service/      Business rules — interfaces + impl/ package
+  repository/   Spring Data JPA interfaces
+  model/        JPA entities — User, Category, Post, PostImage, Role
+  dto/          Form-backing objects (separate from entities)
+  security/     Spring Security — login, roles, UserDetails
+  config/       App config + first-run data seeding (categories + super-admin)
+  exception/    Custom exceptions + friendly error pages
+  util/         SlugUtils (slug generation)
+
+src/main/resources/
+  templates/    Thymeleaf HTML views (public + admin)
+  static/       CSS, JS (editor.js, main.js), img/, uploads/
+  application.properties
+  db-migration.sql
+```
+
+---
+
+## 7. Category list (as of September 2026)
+
+Technology · Science · Programming · Information & Communication Technology · Gaming ·
+Travel · Food · Education · Philosophy · Society & Opinion · **Movies** · **TV Series** ·
+**Web Development** · **Visual Arts** · **AI** · **Creativity** · **Music** · **Skills** ·
+**Cartoons** · **Dramas** · **Culture**
+
+New categories can be added at any time from **Admin → 🏷️ Categories** without redeploying.
+
+---
+
+## 8. Save progress with Git
 
 ```bash
 git add .
@@ -126,58 +171,28 @@ git commit -m "Describe what changed"
 git push
 ```
 
-IntelliJ also has this built in under **Git > Commit** and **Git > Push** if you
-prefer the UI over the terminal.
+---
 
-## 6. Hosting it on the internet (after you've verified it locally)
+## 9. Deploy to Oracle VM
 
-Once everything works on `localhost`, you have a few realistic options to put it
-on the public internet with a domain name. All of them need the same two things:
-a place to run the Spring Boot app, and a MySQL database it can reach.
+See [`PROJECT_REPORT.md`](PROJECT_REPORT.md) — Section 11 for the full 16-step Oracle VM
+deployment guide (DuckDNS + Nginx + Let's Encrypt HTTPS).
 
-**Easiest for a student project (free/cheap tiers):**
-- [Railway](https://railway.app) or [Render](https://render.com) — connect your
-  GitHub repo, they build the `pom.xml` project automatically and give you a
-  managed MySQL/Postgres add-on and a public URL. Add a custom domain in their
-  dashboard once you own one (Namecheap, Google Domains, etc.).
-
-**More control (still budget-friendly):**
-- A small VPS (DigitalOcean, Hetzner, Oracle Cloud free tier). Install Java +
-  MySQL there, build the app with `mvn clean package`, run the resulting jar
-  from `target/vidura-rvs-blog.jar` with `java -jar vidura-rvs-blog.jar`, and
-  point your domain's DNS `A` record at the server's IP. Use a reverse proxy
-  (Nginx or Caddy) in front of it for HTTPS via Let's Encrypt.
-
-Whichever you choose, remember to:
-- Set real production values for `spring.datasource.*` and the bootstrap admin
-  password via environment variables instead of committing them to Git.
-- Set `spring.jpa.hibernate.ddl-auto=validate` (not `update`) once your schema
-  is stable, and manage schema changes deliberately from then on.
-
-## Project structure
-
-```
-src/main/java/com/vidurarvs/blog/
-  controller/   HTTP endpoints (public site + admin area)
-  service/      business rules (interfaces + impl/ package)
-  repository/   Spring Data JPA interfaces
-  model/        JPA entities (User, Category, Post, Role)
-  dto/          form-backing objects, separate from entities
-  security/     Spring Security wiring (login, roles, UserDetails)
-  config/       app-wide config + first-run data seeding
-  exception/    custom exceptions + friendly error pages
-  util/         small stateless helpers (slug generation)
-src/main/resources/
-  templates/    Thymeleaf HTML views
-  static/       CSS, and uploaded images at runtime
-  application.properties
+Quick summary:
+```bash
+# On Oracle VM:
+sudo git pull
+sudo -u vidurarvs mvn clean package -DskipTests
+sudo systemctl restart vidurarvs
 ```
 
-## Where to go next
+---
 
-Ideas for you to extend as you learn (good candidates for your SE module writeup):
-- A self-service "change my password" page.
-- Comments on posts (would introduce a new entity + moderation flow).
-- Rich-text/Markdown editor instead of a plain textarea.
-- Unit tests for `PostServiceImpl`'s ownership rules using Mockito.
-- Flyway migrations instead of `ddl-auto=update` before going to production.
+## 10. Ideas for extension
+
+- Self-service password change screen.
+- Comments on posts (new entity + moderation flow).
+- Unit tests for `PostServiceImpl` ownership rules (JUnit 5 + Mockito).
+- Flyway migrations instead of `ddl-auto=update` before production.
+- Image resizing on upload (Thumbnailator library).
+- Post scheduling (publish at a future date/time).

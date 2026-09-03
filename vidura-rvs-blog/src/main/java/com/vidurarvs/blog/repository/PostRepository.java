@@ -58,6 +58,9 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     long countByAuthor(User author);
 
+    /** Used by CategoryServiceImpl to prevent deletion of categories that still have posts. */
+    long countByCategory(Category category);
+
     @Query("select coalesce(sum(p.viewCount), 0) from Post p")
     long sumAllViewCounts();
 
