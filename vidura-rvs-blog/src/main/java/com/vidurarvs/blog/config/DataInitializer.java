@@ -42,6 +42,7 @@ public class DataInitializer implements CommandLineRunner {
     private String superAdminPassword;
 
     private static final List<String> DEFAULT_CATEGORIES = List.of(
+            // ── Original categories ──────────────────────────────────────────
             "Technology",
             "Science",
             "Programming",
@@ -51,7 +52,19 @@ public class DataInitializer implements CommandLineRunner {
             "Food",
             "Education",
             "Philosophy",
-            "Society & Opinion"
+            "Society & Opinion",
+            // ── New categories added September 2026 ──────────────────────────
+            "Movies",
+            "TV Series",
+            "Web Development",
+            "Visual Arts",
+            "AI",
+            "Creativity",
+            "Music",
+            "Skills",
+            "Cartoons",
+            "Dramas",
+            "Culture"
     );
 
     public DataInitializer(CategoryRepository categoryRepository,
