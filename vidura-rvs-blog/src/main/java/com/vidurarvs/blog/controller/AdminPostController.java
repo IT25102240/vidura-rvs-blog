@@ -8,6 +8,7 @@ import com.vidurarvs.blog.service.CategoryService;
 import com.vidurarvs.blog.service.PostService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -83,7 +84,8 @@ public class AdminPostController {
         form.setContent(post.getContent());
         form.setCategoryId(post.getCategory().getId());
         form.setTags(post.getTags());
-        form.setYoutubeVideoId(post.getYoutubeVideoId());
+        // Display existing YT ID in the input field
+        form.setYoutubeInput(post.getYoutubeVideoId());
         form.setPublished(post.isPublished());
 
         model.addAttribute("postForm", form);
@@ -118,5 +120,48 @@ public class AdminPostController {
         postService.delete(id, principal.getUser());
         redirectAttributes.addFlashAttribute("successMessage", "Post deleted.");
         return "redirect:/admin/posts";
+    }
+
+    /**
+     * Quick publish ↔ draft toggle — called from the post-list table.
+     * Returns a redirect so the list refreshes with the updated status badge.
+     */
+    @PostMapping("/{id}/toggle-visibility")
+    public String toggleVisibility(@PathVariable Long id,
+                                    @AuthenticationPrincipal CustomUserPrincipal principal,
+                                    RedirectAttributes redirectAttributes) {
+        postService.toggleVisibility(id, principal.getUser());
+        redirectAttributes.addFlashAttribute("successMessage", "Post visibility updated.");
+        return "redirect:/admin/posts";
+    }
+
+    /**
+     * AJAX endpoint: browser auto-save posts the Quill HTML body here.
+     * We save it with published=false (draft) so the admin can come back later.
+     * Returns 200 OK or 400 if the post doesn't exist / isn't editable.
+     */
+    @PostMapping("/{id}/autosave")
+    @ResponseBody
+    public ResponseEntity<String> autosave(@PathVariable Long id,
+                                            @RequestBody(required = false) String content,
+                                            @AuthenticationPrincipal CustomUserPrincipal principal) {
+        try {
+            Post post = postService.findByIdOrThrow(id);
+            postService.checkEditable(post, principal.getUser());
+            // Build a minimal DTO just to save the content as a draft
+            PostFormDTO draft = new PostFormDTO();
+            draft.setId(id);
+            draft.setTitle(post.getTitle());
+            draft.setSummary(post.getSummary() == null ? "" : post.getSummary());
+            draft.setContent(content == null ? "" : content);
+            draft.setCategoryId(post.getCategory().getId());
+            draft.setTags(post.getTags());
+            draft.setYoutubeInput(post.getYoutubeVideoId());
+            draft.setPublished(post.isPublished());
+            postService.update(id, draft, principal.getUser());
+            return ResponseEntity.ok("saved");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("error: " + e.getMessage());
+        }
     }
 }

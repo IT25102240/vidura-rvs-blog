@@ -6,6 +6,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A single article/post authored by an admin.
@@ -54,6 +56,15 @@ public class Post {
     @Column(length = 300)
     private String tags;
 
+    /**
+     * All images for this post (cover first, then gallery).
+     * Replaces the single coverImagePath field for new posts.
+     * Loaded eagerly on detail pages to avoid LazyInitializationException.
+     */
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OrderBy("sortOrder ASC")
+    private List<PostImage> images = new ArrayList<>();
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
@@ -91,10 +102,23 @@ public class Post {
     }
 
     public boolean hasCoverImage() {
-        return coverImagePath != null && !coverImagePath.isBlank();
+        return (images != null && !images.isEmpty()) ||
+               (coverImagePath != null && !coverImagePath.isBlank());
+    }
+
+    /** Returns the primary/cover image path (first in sort order, or legacy coverImagePath). */
+    public String primaryImagePath() {
+        if (images != null && !images.isEmpty()) {
+            return images.get(0).getImagePath();
+        }
+        return coverImagePath;
     }
 
     public boolean hasVideo() {
         return youtubeVideoId != null && !youtubeVideoId.isBlank();
+    }
+
+    public String youtubeWatchUrl() {
+        return "https://www.youtube.com/watch?v=" + youtubeVideoId;
     }
 }

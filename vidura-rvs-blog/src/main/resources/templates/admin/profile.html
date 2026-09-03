@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="~{fragments/layout :: head('My Profile')}"></th:block>
+<body>
+<div th:replace="~{fragments/layout :: header}"></div>
+
+<main class="container narrow">
+    <div th:replace="~{admin/fragments/admin-nav :: nav('profile')}"></div>
+
+    <h1 class="page-title">My Profile</h1>
+
+    <p class="form-success" th:if="${successMessage}" th:text="${successMessage}"></p>
+
+    <!-- Current profile preview -->
+    <div style="display:flex;align-items:center;gap:20px;padding:24px;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;margin-bottom:28px;">
+        <img th:if="${profileUser.hasProfilePicture() and !profileUser.profilePicturePath.startsWith('static-img/')}"
+             th:src="@{'/uploads/' + ${profileUser.profilePicturePath}}"
+             style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid var(--accent);"
+             th:alt="${profileUser.fullName}"/>
+        <img th:if="${profileUser.hasProfilePicture() and profileUser.profilePicturePath.startsWith('static-img/')}"
+             th:src="@{'/' + ${profileUser.profilePicturePath}}"
+             style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid var(--accent);"
+             th:alt="${profileUser.fullName}"/>
+        <div th:unless="${profileUser.hasProfilePicture()}"
+             style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent-dark));color:#fff;font-size:1.8rem;font-weight:700;display:flex;align-items:center;justify-content:center;border:3px solid var(--accent);"
+             th:text="${#strings.substring(profileUser.fullName, 0, 1)}">V</div>
+        <div>
+            <p style="font-size:1.2rem;font-weight:700;color:var(--ink);" th:text="${profileUser.fullName}">Name</p>
+            <p style="color:var(--ink-dim);font-size:0.85rem;" th:text="${profileUser.email}">email</p>
+            <span class="status-badge published"
+                  th:text="${profileUser.isSuperAdmin()} ? '👑 Super Admin' : '✅ Admin'">Role</span>
+            <p style="margin-top:8px;">
+                <a th:href="@{'/author/' + ${profileUser.username}}" target="_blank"
+                   style="font-size:0.85rem;color:var(--accent-light);">View public profile →</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Profile Edit Form -->
+    <form action="/admin/profile" method="post" enctype="multipart/form-data" class="stacked-form">
+
+        <label for="bio">Bio <span style="color:var(--ink-dim);font-weight:400;">(shown on your public profile page)</span></label>
+        <textarea id="bio" name="bio" rows="4"
+                  th:text="${profileUser.bio}"
+                  placeholder="Tell readers who you are, what you write about, and what drives you…"></textarea>
+
+        <label for="photo">Profile photo <span style="color:var(--ink-dim);font-weight:400;">(JPEG / PNG, max 5 MB)</span></label>
+        <div class="image-upload-zone" style="text-align:left;padding:16px;">
+            <input id="photo" type="file" name="photo" accept="image/jpeg,image/png,image/webp"
+                   style="color:var(--ink-muted);font-size:0.9rem;"/>
+            <p class="field-hint" style="margin-top:8px;">Upload a clear, square-ish photo for best results.</p>
+        </div>
+
+        <button type="submit">💾 Save profile</button>
+    </form>
+</main>
+
+<div th:replace="~{fragments/layout :: footer}"></div>
+</body>
+</html>

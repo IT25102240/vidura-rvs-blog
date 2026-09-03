@@ -2,6 +2,7 @@ package com.vidurarvs.blog.controller;
 
 import com.vidurarvs.blog.model.Category;
 import com.vidurarvs.blog.service.CategoryService;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -23,6 +24,7 @@ public class GlobalModelAttributes {
     }
 
     @ModelAttribute("navCategories")
+    @Cacheable("navCategories")
     public List<Category> navCategories() {
         return categoryService.findAll();
     }

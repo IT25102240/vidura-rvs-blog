@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="~{fragments/layout :: head(${profileUser.fullName} + ' — Author')}"></th:block>
+<body>
+<div th:replace="~{fragments/layout :: header}"></div>
+
+<!-- Author Hero -->
+<section class="author-hero">
+    <div class="container">
+        <div class="author-hero-inner">
+            <!-- Profile photo or initials -->
+            <img th:if="${profileUser.hasProfilePicture() and !profileUser.profilePicturePath.startsWith('static-img/')}"
+                 th:src="@{'/uploads/' + ${profileUser.profilePicturePath}}"
+                 class="author-photo" th:alt="${profileUser.fullName}"/>
+            <img th:if="${profileUser.hasProfilePicture() and profileUser.profilePicturePath.startsWith('static-img/')}"
+                 th:src="@{'/' + ${profileUser.profilePicturePath}}"
+                 class="author-photo" th:alt="${profileUser.fullName}"/>
+            <div th:unless="${profileUser.hasProfilePicture()}" class="author-photo-placeholder"
+                 th:text="${#strings.substring(profileUser.fullName, 0, 1)}">V</div>
+
+            <div class="author-info">
+                <div class="author-role-badge"
+                     th:text="${profileUser.isSuperAdmin()} ? 'Owner · Super Admin' : 'Verified Admin'">Role</div>
+                <h1 th:text="${profileUser.fullName}">Author Name</h1>
+                <p class="author-bio"
+                   th:text="${profileUser.bio} ?: 'Writer and contributor at ViduraRvs.'">Bio</p>
+                <div class="author-stats">
+                    <div>
+                        <span class="author-stat-num" th:text="${authorPosts.totalElements}">0</span>
+                        <span class="author-stat-label">Articles</span>
+                    </div>
+                    <div>
+                        <span class="author-stat-num" th:text="${totalViews}">0</span>
+                        <span class="author-stat-label">Total Views</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Author's Posts -->
+<main class="container" style="margin-top: 48px;">
+    <div class="section-header">
+        <h2 class="section-title">Posts by <span th:text="${profileUser.fullName}">Author</span></h2>
+    </div>
+
+    <p th:if="${authorPosts.isEmpty()}" class="empty-state">No posts published yet.</p>
+
+    <div class="post-grid">
+        <article class="post-card" th:each="post : ${authorPosts.content}">
+            <a th:href="@{'/post/' + ${post.slug}}" class="post-card-media">
+                <img th:if="${!post.images.isEmpty()}"
+                     th:src="@{'/uploads/' + ${post.images[0].imagePath}}"
+                     th:alt="${post.title}" loading="lazy"/>
+                <img th:if="${post.images.isEmpty() and post.coverImagePath != null}"
+                     th:src="@{'/uploads/' + ${post.coverImagePath}}"
+                     th:alt="${post.title}" loading="lazy"/>
+                <div th:unless="${post.hasCoverImage()}" class="post-card-media placeholder"
+                     th:text="${#strings.substring(post.category.name, 0, 1)}">T</div>
+            </a>
+            <div class="post-card-body">
+                <a th:href="@{'/category/' + ${post.category.slug}}" class="tag-pill" th:text="${post.category.name}">Category</a>
+                <h2><a th:href="@{'/post/' + ${post.slug}}" th:text="${post.title}">Title</a></h2>
+                <p class="post-summary" th:text="${post.summary}">Summary</p>
+                <p class="post-meta">
+                    <span th:text="${#temporals.format(post.createdAt, 'dd MMM yyyy')}">date</span>
+                    &middot;
+                    <span th:text="${post.viewCount} + ' views'">views</span>
+                </p>
+            </div>
+        </article>
+    </div>
+
+    <nav class="pagination" th:if="${authorPosts.totalPages > 1}">
+        <span th:text="'Page 1 of ' + ${authorPosts.totalPages}"></span>
+    </nav>
+</main>
+
+<div th:replace="~{fragments/layout :: footer}"></div>
+</body>
+</html>

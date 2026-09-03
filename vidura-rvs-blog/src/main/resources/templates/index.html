@@ -4,21 +4,47 @@
 <body>
 <div th:replace="~{fragments/layout :: header}"></div>
 
+<!-- Hero Banner -->
+<section class="hero-banner">
+    <div class="container">
+        <h1><span>Vidura</span>Rvs</h1>
+        <p>Independent writing on technology, science, programming and the ideas shaping our world.</p>
+        <div class="hero-stats">
+            <div class="hero-stat">
+                <span class="hero-stat-num" th:text="${posts.totalElements}">0</span>
+                <span class="hero-stat-label">Articles</span>
+            </div>
+            <div class="hero-stat">
+                <span class="hero-stat-num" th:text="${#lists.size(navCategories)}">0</span>
+                <span class="hero-stat-label">Categories</span>
+            </div>
+        </div>
+    </div>
+</section>
+
 <main class="container">
-    <h1 class="page-title" th:text="${heading}">Latest posts</h1>
+    <div class="section-header">
+        <h2 class="section-title" th:text="${heading}">Latest posts</h2>
+    </div>
 
     <p th:if="${query != null and posts.totalElements == 0}" class="empty-state">
         No articles match "<span th:text="${query}"></span>" yet. Try another keyword.
     </p>
     <p th:if="${query == null and posts.totalElements == 0}" class="empty-state">
-        Nothing published in this section yet - check back soon.
+        Nothing published in this section yet — check back soon.
     </p>
 
     <div class="post-grid">
         <article class="post-card" th:each="post : ${posts.content}">
             <a th:href="@{'/post/' + ${post.slug}}" class="post-card-media">
-                <img th:if="${post.hasCoverImage()}" th:src="@{'/uploads/' + ${post.coverImagePath}}"
-                     th:alt="${post.title}"/>
+                <!-- New multi-image: use first image -->
+                <img th:if="${post.hasCoverImage() and !post.images.isEmpty()}"
+                     th:src="@{'/uploads/' + ${post.images[0].imagePath}}"
+                     th:alt="${post.title}" loading="lazy"/>
+                <!-- Legacy single cover image -->
+                <img th:if="${post.hasCoverImage() and post.images.isEmpty() and post.coverImagePath != null}"
+                     th:src="@{'/uploads/' + ${post.coverImagePath}}"
+                     th:alt="${post.title}" loading="lazy"/>
                 <div th:unless="${post.hasCoverImage()}" class="post-card-media placeholder"
                      th:text="${#strings.substring(post.category.name, 0, 1)}">T</div>
             </a>
@@ -27,9 +53,17 @@
                 <h2><a th:href="@{'/post/' + ${post.slug}}" th:text="${post.title}">Title</a></h2>
                 <p class="post-summary" th:text="${post.summary}">Summary</p>
                 <p class="post-meta">
+                    <!-- Author avatar -->
+                    <img th:if="${post.author.hasProfilePicture()}"
+                         th:src="@{'/uploads/' + ${post.author.profilePicturePath}}"
+                         class="author-avatar" th:alt="${post.author.fullName}"/>
+                    <span th:unless="${post.author.hasProfilePicture()}" class="author-initials"
+                          th:text="${#strings.substring(post.author.fullName, 0, 1)}">V</span>
+                    <span th:text="${post.author.fullName}">Author</span>
+                    &middot;
                     <span th:text="${#temporals.format(post.createdAt, 'dd MMM yyyy')}">date</span>
-                    &middot; <span th:text="${post.author.fullName}">author</span>
-                    &middot; <span th:text="${post.viewCount} + ' views'">views</span>
+                    &middot;
+                    <span th:text="${post.viewCount} + ' views'">views</span>
                 </p>
             </div>
         </article>

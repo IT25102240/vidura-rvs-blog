@@ -1,43 +1,134 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <th:block th:replace="~{fragments/layout :: head(${post.title})}"></th:block>
+<!-- SEO: Article schema -->
+<script type="application/ld+json" th:utext="'{ &quot;@context&quot;: &quot;https://schema.org&quot;, &quot;@type&quot;: &quot;Article&quot;, &quot;headline&quot;: &quot;' + ${post.title} + '&quot;, &quot;author&quot;: { &quot;@type&quot;: &quot;Person&quot;, &quot;name&quot;: &quot;' + ${post.author.fullName} + '&quot; } }'">
+</script>
 <body>
 <div th:replace="~{fragments/layout :: header}"></div>
 
 <main class="container narrow">
     <article class="post-full">
+        <!-- Category pill -->
         <a th:href="@{'/category/' + ${post.category.slug}}" class="tag-pill" th:text="${post.category.name}">Category</a>
+
+        <!-- Title -->
         <h1 th:text="${post.title}">Title</h1>
-        <p class="post-meta">
-            By <strong th:text="${post.author.fullName}">Author</strong>
-            &middot; <span th:text="${#temporals.format(post.createdAt, 'dd MMMM yyyy')}">date</span>
-            &middot; <span th:text="${post.viewCount} + ' views'">views</span>
-        </p>
 
-        <img th:if="${post.hasCoverImage()}" class="post-cover" th:src="@{'/uploads/' + ${post.coverImagePath}}"
-             th:alt="${post.title}"/>
-
-        <div class="video-embed" th:if="${post.hasVideo()}">
-            <iframe th:src="'https://www.youtube.com/embed/' + ${post.youtubeVideoId}"
-                    title="Embedded YouTube video" frameborder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowfullscreen></iframe>
+        <!-- Author byline -->
+        <div class="post-byline">
+            <a th:href="@{'/author/' + ${post.author.username}}"
+               th:title="'View profile of ' + ${post.author.fullName}">
+                <img th:if="${post.author.hasProfilePicture()}"
+                     th:src="@{'/uploads/' + ${post.author.profilePicturePath}}"
+                     class="post-byline-avatar" th:alt="${post.author.fullName}"/>
+                <span th:unless="${post.author.hasProfilePicture()}"
+                      class="post-byline-initials"
+                      th:text="${#strings.substring(post.author.fullName, 0, 1)}">V</span>
+            </a>
+            <div class="post-byline-info">
+                <a th:href="@{'/author/' + ${post.author.username}}"
+                   class="post-byline-name" th:text="${post.author.fullName}">Author</a>
+                <span class="post-byline-date"
+                      th:text="${#temporals.format(post.createdAt, 'dd MMMM yyyy')} + ' · ' + ${post.viewCount} + ' views'">date</span>
+            </div>
         </div>
 
+        <!-- Image Gallery (up to 5 images) -->
+        <th:block th:if="${!post.images.isEmpty()}">
+            <div th:if="${post.images.size() == 1}" class="post-gallery single">
+                <img th:src="@{'/uploads/' + ${post.images[0].imagePath}}"
+                     th:alt="${post.images[0].caption} ?: ${post.title}" loading="lazy"/>
+            </div>
+            <div th:if="${post.images.size() > 1}" class="post-gallery multi">
+                <img class="gallery-main"
+                     th:src="@{'/uploads/' + ${post.images[0].imagePath}}"
+                     th:alt="${post.images[0].caption} ?: ${post.title}" loading="lazy"/>
+                <img th:each="img, stat : ${post.images}"
+                     th:if="${stat.index > 0}"
+                     th:src="@{'/uploads/' + ${img.imagePath}}"
+                     th:alt="${img.caption} ?: (${post.title} + ' image ' + ${stat.index})"
+                     loading="lazy"/>
+            </div>
+        </th:block>
+        <!-- Legacy single cover image -->
+        <th:block th:if="${post.images.isEmpty() and post.coverImagePath != null}">
+            <div class="post-gallery single">
+                <img th:src="@{'/uploads/' + ${post.coverImagePath}}" th:alt="${post.title}" loading="lazy"/>
+            </div>
+        </th:block>
+
+        <!-- YouTube Video -->
+        <div class="video-section" th:if="${post.hasVideo()}">
+            <p class="video-section-title">📺 Video</p>
+            <div class="video-embed">
+                <iframe th:src="'https://www.youtube.com/embed/' + ${post.youtubeVideoId}"
+                        title="Embedded YouTube video" frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen loading="lazy"></iframe>
+            </div>
+            <a th:href="${post.youtubeWatchUrl()}" target="_blank" rel="noopener noreferrer"
+               class="video-watch-link">
+                ▶ Watch on YouTube
+            </a>
+        </div>
+
+        <!-- Post Content (Quill HTML) -->
         <div class="post-content" th:utext="${post.content}">Content</div>
 
-        <p class="post-tags" th:if="${post.tags != null and !post.tags.isBlank()}">
-            <span th:each="tag : ${#strings.arraySplit(post.tags, ',')}" class="tag-pill muted" th:text="${#strings.trim(tag)}">tag</span>
-        </p>
+        <!-- Tags -->
+        <div class="post-tags" th:if="${post.tags != null and !post.tags.isBlank()}">
+            <span th:each="tag : ${#strings.arraySplit(post.tags, ',')}"
+                  class="tag-pill muted" th:text="${#strings.trim(tag)}">tag</span>
+        </div>
+
+        <!-- Share buttons -->
+        <div class="share-section">
+            <h3>Share this post</h3>
+            <div class="share-buttons">
+                <button class="share-btn x" data-share="x">𝕏 Share</button>
+                <button class="share-btn whatsapp" data-share="whatsapp">💬 WhatsApp</button>
+                <button class="share-btn copy" data-share="copy">🔗 Copy link</button>
+            </div>
+        </div>
+
+        <!-- Author card -->
+        <div class="author-mini-card" style="display:flex;align-items:center;gap:16px;padding:24px;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;margin-top:32px;">
+            <a th:href="@{'/author/' + ${post.author.username}}">
+                <img th:if="${post.author.hasProfilePicture()}"
+                     th:src="@{'/uploads/' + ${post.author.profilePicturePath}}"
+                     style="width:60px;height:60px;border-radius:50%;object-fit:cover;border:2px solid var(--accent);"
+                     th:alt="${post.author.fullName}"/>
+                <span th:unless="${post.author.hasProfilePicture()}"
+                      style="width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent-dark));color:#fff;font-size:1.4rem;font-weight:700;display:flex;align-items:center;justify-content:center;"
+                      th:text="${#strings.substring(post.author.fullName, 0, 1)}">V</span>
+            </a>
+            <div>
+                <p style="font-weight:600;margin-bottom:4px;">
+                    <a th:href="@{'/author/' + ${post.author.username}}"
+                       th:text="'By ' + ${post.author.fullName}"
+                       style="color:var(--ink)!important;">By Author</a>
+                </p>
+                <p th:if="${post.author.bio != null}" th:text="${post.author.bio}"
+                   style="color:var(--ink-muted);font-size:0.88rem;"></p>
+                <a th:href="@{'/author/' + ${post.author.username}}"
+                   style="font-size:0.82rem;color:var(--accent-light);">View all posts →</a>
+            </div>
+        </div>
     </article>
 
+    <!-- Related Posts -->
     <section class="related-posts" th:if="${!relatedPosts.isEmpty()}">
         <h2 th:text="'More in ' + ${post.category.name}">More</h2>
-        <ul>
-            <li th:each="related : ${relatedPosts.content}">
-                <a th:href="@{'/post/' + ${related.slug}}" th:text="${related.title}">Related title</a>
-            </li>
-        </ul>
+        <div class="related-grid">
+            <a th:each="related : ${relatedPosts.content}"
+               th:href="@{'/post/' + ${related.slug}}"
+               class="related-card">
+                <p class="related-card-title" th:text="${related.title}">Title</p>
+                <p class="related-card-meta"
+                   th:text="${#temporals.format(related.createdAt, 'dd MMM yyyy')}">date</p>
+            </a>
+        </div>
     </section>
 </main>
 

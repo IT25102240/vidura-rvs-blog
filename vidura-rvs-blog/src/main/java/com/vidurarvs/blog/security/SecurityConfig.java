@@ -11,7 +11,7 @@ import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 
 /**
  * Access rules for ViduraRvs:
- * - Everyone (no login) can read the public blog and search.
+ * - Everyone (no login) can read the public blog, search, and view author profiles.
  * - /admin/admins/** (managing other admin accounts) is SUPER_ADMIN only.
  * - Everything else under /admin/** requires ADMIN or SUPER_ADMIN.
  */
@@ -29,7 +29,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/post/**", "/category/**", "/search", "/about",
-                                "/css/**", "/js/**", "/uploads/**", "/login").permitAll()
+                                "/author/**", "/css/**", "/js/**", "/img/**", "/uploads/**", "/login").permitAll()
                         .requestMatchers("/admin/admins/**").hasRole("SUPER_ADMIN")
                         .requestMatchers("/admin/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
                         .anyRequest().permitAll()
@@ -45,14 +45,9 @@ public class SecurityConfig {
                         .logoutSuccessUrl("/")
                         .permitAll()
                 )
-                // This app has no public forms that mutate state without a session,
-                // so the default CSRF protection (enabled) is kept for all admin actions.
-                // Use the classic (non-BREACH-masked) token handler: Spring Security 6.2's
-                // default XorCsrfTokenRequestAttributeHandler generates a per-request masked
-                // token value intended for SPA/JS clients that re-read the token from a cookie;
-                // it does not play well with plain server-rendered Thymeleaf forms where the
-                // hidden _csrf field is rendered once and posted back, so it was causing every
-                // admin form submission to be rejected as "Invalid CSRF token".
+                // Classic (non-BREACH-masked) CSRF handler: works correctly with
+                // server-rendered Thymeleaf forms where the hidden _csrf field is
+                // rendered once and posted back as-is.
                 .csrf(csrf -> csrf.csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler()))
                 .exceptionHandling(handling -> handling.accessDeniedPage("/access-denied"));
 

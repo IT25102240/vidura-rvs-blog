@@ -9,33 +9,61 @@
 
     <div class="admin-header-row">
         <h1 class="page-title">Posts</h1>
-        <a th:href="@{/admin/posts/new}" class="button">Write a new post</a>
+        <a th:href="@{/admin/posts/new}" class="button">✏️ Write a new post</a>
     </div>
 
     <p class="form-success" th:if="${successMessage}" th:text="${successMessage}"></p>
 
     <table class="admin-table" th:if="${!posts.isEmpty()}">
         <thead>
-        <tr><th>Title</th><th>Category</th><th>Author</th><th>Status</th><th>Views</th><th>Actions</th></tr>
+        <tr>
+            <th>Title</th>
+            <th>Category</th>
+            <th>Author</th>
+            <th>Status</th>
+            <th>Views</th>
+            <th>Date</th>
+            <th>Actions</th>
+        </tr>
         </thead>
         <tbody>
         <tr th:each="post : ${posts.content}">
-            <td><a th:href="@{'/post/' + ${post.slug}}" th:text="${post.title}">Title</a></td>
+            <td>
+                <a th:href="@{'/post/' + ${post.slug}}" th:text="${post.title}" target="_blank"
+                   style="color:var(--ink);font-weight:500;">Title</a>
+            </td>
             <td th:text="${post.category.name}">Category</td>
             <td th:text="${post.author.fullName}">Author</td>
-            <td th:text="${post.published} ? 'Published' : 'Draft'">Status</td>
+            <td>
+                <span class="status-badge"
+                      th:classappend="${post.published} ? 'published' : 'draft'"
+                      th:text="${post.published} ? '● Published' : '○ Draft'">Status</span>
+            </td>
             <td th:text="${post.viewCount}">0</td>
+            <td th:text="${#temporals.format(post.createdAt, 'dd MMM yyyy')}">date</td>
             <td class="row-actions">
-                <a th:href="@{'/admin/posts/' + ${post.id} + '/edit'}">Edit</a>
+                <a th:href="@{'/admin/posts/' + ${post.id} + '/edit'}" class="link-button">Edit</a>
+
+                <!-- Quick visibility toggle -->
+                <form th:action="@{'/admin/posts/' + ${post.id} + '/toggle-visibility'}" method="post" class="inline-form">
+                    <button type="submit" class="link-button warning"
+                            th:text="${post.published} ? '🙈 Hide' : '👁 Show'"
+                            th:title="${post.published} ? 'Hide from visitors' : 'Show to visitors'">Toggle</button>
+                </form>
+
+                <!-- Preview in new tab -->
+                <a th:href="@{'/post/' + ${post.slug}}" target="_blank" class="link-button" title="Preview post">👁 View</a>
+
+                <!-- Delete -->
                 <form th:action="@{'/admin/posts/' + ${post.id} + '/delete'}" method="post"
-                      onsubmit="return confirm('Delete this post permanently?');" class="inline-form">
+                      onsubmit="return confirm('Delete this post permanently? This cannot be undone.');" class="inline-form">
                     <button type="submit" class="link-button danger">Delete</button>
                 </form>
             </td>
         </tr>
         </tbody>
     </table>
-    <p th:if="${posts.isEmpty()}" class="empty-state">No posts yet.</p>
+    <p th:if="${posts.isEmpty()}" class="empty-state">No posts yet. Write your first one!</p>
 
     <nav class="pagination" th:if="${posts.totalPages > 1}">
         <a th:if="${posts.hasPrevious()}" th:href="@{/admin/posts(page=${posts.number - 1})}">&larr; Newer</a>

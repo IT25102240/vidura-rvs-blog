@@ -7,9 +7,24 @@
 <main class="container">
     <div th:replace="~{admin/fragments/admin-nav :: nav('dashboard')}"></div>
 
-    <h1 class="page-title" th:text="'Welcome back, ' + ${currentUser.fullName}">Dashboard</h1>
-    <p class="muted" th:text="${currentUser.isSuperAdmin()} ? 'Owner account' : 'Verified admin'">Role</p>
+    <!-- Welcome header with profile photo -->
+    <div class="admin-welcome">
+        <img th:if="${currentUser.hasProfilePicture() and !currentUser.profilePicturePath.startsWith('static-img/')}"
+             th:src="@{'/uploads/' + ${currentUser.profilePicturePath}}"
+             class="admin-welcome-photo" th:alt="${currentUser.fullName}"/>
+        <img th:if="${currentUser.hasProfilePicture() and currentUser.profilePicturePath.startsWith('static-img/')}"
+             th:src="@{'/' + ${currentUser.profilePicturePath}}"
+             class="admin-welcome-photo" th:alt="${currentUser.fullName}"/>
+        <div th:unless="${currentUser.hasProfilePicture()}" class="admin-welcome-initials"
+             th:text="${#strings.substring(currentUser.fullName, 0, 1)}">V</div>
+        <div class="admin-welcome-info">
+            <h1 th:text="'Welcome back, ' + ${currentUser.fullName}">Dashboard</h1>
+            <p class="admin-welcome-role"
+               th:text="${currentUser.isSuperAdmin()} ? '👑 Owner account · Super Admin' : '✅ Verified admin'">Role</p>
+        </div>
+    </div>
 
+    <!-- Stats -->
     <section class="stat-grid">
         <div class="stat-card">
             <span class="stat-number" th:text="${myPostCount}">0</span>
@@ -33,37 +48,78 @@
         </div>
     </section>
 
+    <!-- Quick Actions -->
+    <section class="admin-section">
+        <h2>Quick actions</h2>
+        <div class="quick-actions">
+            <a th:href="@{/admin/posts/new}" class="quick-action-card">
+                <span class="quick-action-icon">✏️</span>
+                <span class="quick-action-label">Write a post</span>
+            </a>
+            <a th:href="@{/admin/posts}" class="quick-action-card">
+                <span class="quick-action-icon">📋</span>
+                <span class="quick-action-label">Manage posts</span>
+            </a>
+            <a th:href="@{/admin/profile}" class="quick-action-card">
+                <span class="quick-action-icon">👤</span>
+                <span class="quick-action-label">My profile</span>
+            </a>
+            <a th:href="@{/}" target="_blank" class="quick-action-card">
+                <span class="quick-action-icon">🌐</span>
+                <span class="quick-action-label">View site</span>
+            </a>
+            <a th:if="${currentUser.isSuperAdmin()}" th:href="@{/admin/admins}" class="quick-action-card">
+                <span class="quick-action-icon">👥</span>
+                <span class="quick-action-label">Manage admins</span>
+            </a>
+        </div>
+    </section>
+
+    <!-- Your recent posts -->
     <section class="admin-section">
         <h2>Your recent posts</h2>
         <table class="admin-table" th:if="${!recentPosts.isEmpty()}">
             <thead>
-            <tr><th>Title</th><th>Category</th><th>Status</th><th>Views</th><th>Published</th></tr>
+            <tr><th>Title</th><th>Category</th><th>Status</th><th>Views</th><th>Date</th></tr>
             </thead>
             <tbody>
             <tr th:each="post : ${recentPosts.content}">
-                <td><a th:href="@{'/post/' + ${post.slug}}" th:text="${post.title}">Title</a></td>
+                <td><a th:href="@{'/post/' + ${post.slug}}" th:text="${post.title}" style="color:var(--ink);font-weight:500;">Title</a></td>
                 <td th:text="${post.category.name}">Category</td>
-                <td th:text="${post.published} ? 'Published' : 'Draft'">Status</td>
+                <td>
+                    <span class="status-badge"
+                          th:classappend="${post.published} ? 'published' : 'draft'"
+                          th:text="${post.published} ? '● Published' : '○ Draft'">Status</span>
+                </td>
                 <td th:text="${post.viewCount}">0</td>
                 <td th:text="${#temporals.format(post.createdAt, 'dd MMM yyyy')}">date</td>
             </tr>
             </tbody>
         </table>
         <p th:if="${recentPosts.isEmpty()}" class="empty-state">You haven't published anything yet.</p>
-        <a th:href="@{/admin/posts/new}" class="button">Write a new post</a>
+        <div style="display:flex;gap:12px;margin-top:16px;">
+            <a th:href="@{/admin/posts/new}" class="button">✏️ Write a new post</a>
+            <a th:href="@{/admin/posts}" class="button secondary">View all posts</a>
+        </div>
     </section>
 
+    <!-- Site-wide activity (Super Admin only) -->
     <section class="admin-section" th:if="${sitePosts != null}">
         <h2>Site-wide activity</h2>
         <table class="admin-table" th:if="${!sitePosts.isEmpty()}">
             <thead>
-            <tr><th>Title</th><th>Author</th><th>Category</th><th>Views</th></tr>
+            <tr><th>Title</th><th>Author</th><th>Category</th><th>Status</th><th>Views</th></tr>
             </thead>
             <tbody>
             <tr th:each="post : ${sitePosts.content}">
-                <td><a th:href="@{'/post/' + ${post.slug}}" th:text="${post.title}">Title</a></td>
+                <td><a th:href="@{'/post/' + ${post.slug}}" th:text="${post.title}" style="color:var(--ink);font-weight:500;">Title</a></td>
                 <td th:text="${post.author.fullName}">Author</td>
                 <td th:text="${post.category.name}">Category</td>
+                <td>
+                    <span class="status-badge"
+                          th:classappend="${post.published} ? 'published' : 'draft'"
+                          th:text="${post.published} ? '● Published' : '○ Draft'">Status</span>
+                </td>
                 <td th:text="${post.viewCount}">0</td>
             </tr>
             </tbody>

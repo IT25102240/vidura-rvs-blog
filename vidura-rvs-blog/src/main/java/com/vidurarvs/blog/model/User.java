@@ -44,6 +44,14 @@ public class User {
     @Column(nullable = false)
     private boolean active = true;
 
+    /** Relative path under /uploads, e.g. "img/vidura-profile.jpg". Optional. */
+    @Column(length = 300)
+    private String profilePicturePath;
+
+    /** Short author bio shown on the public profile page. */
+    @Column(columnDefinition = "TEXT")
+    private String bio;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -54,5 +62,9 @@ public class User {
 
     public boolean isSuperAdmin() {
         return this.role == Role.SUPER_ADMIN;
+    }
+
+    public boolean hasProfilePicture() {
+        return profilePicturePath != null && !profilePicturePath.isBlank();
     }
 }

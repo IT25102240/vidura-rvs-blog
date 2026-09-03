@@ -2,6 +2,7 @@ package com.vidurarvs.blog.service;
 
 import com.vidurarvs.blog.dto.AdminAccountFormDTO;
 import com.vidurarvs.blog.model.User;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -26,4 +27,10 @@ public interface UserService {
     void setActive(Long userId, boolean active, User actingUser);
 
     long countActiveAdmins();
+
+    /**
+     * Update an admin's bio and profile picture. An admin may only update
+     * their own profile; the SUPER_ADMIN may update anyone's.
+     */
+    void updateProfile(Long userId, String bio, MultipartFile photo, User actingUser);
 }

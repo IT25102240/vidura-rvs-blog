@@ -49,6 +49,9 @@ public interface PostService {
 
     void delete(Long postId, User actingUser);
 
+    /** Flip published ↔ draft without opening the full edit form. */
+    void toggleVisibility(Long postId, User actingUser);
+
     long countPublished();
 
     long countByAuthor(User author);

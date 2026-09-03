@@ -2,11 +2,12 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <body>
 <nav class="admin-nav" th:fragment="nav(active)">
-    <a th:href="@{/admin/dashboard}" th:classappend="${active == 'dashboard'} ? ' active'">Dashboard</a>
-    <a th:href="@{/admin/posts}" th:classappend="${active == 'posts'} ? ' active'">Posts</a>
+    <a th:href="@{/admin/dashboard}" th:classappend="${active == 'dashboard'} ? ' active'">📊 Dashboard</a>
+    <a th:href="@{/admin/posts}" th:classappend="${active == 'posts'} ? ' active'">📝 Posts</a>
+    <a th:href="@{/admin/profile}" th:classappend="${active == 'profile'} ? ' active'">👤 My Profile</a>
     <a sec:authorize="hasRole('SUPER_ADMIN')" th:href="@{/admin/admins}"
-       th:classappend="${active == 'admins'} ? ' active'">Manage admins</a>
-    <a th:href="@{/}">View site</a>
+       th:classappend="${active == 'admins'} ? ' active'">👥 Manage admins</a>
+    <a th:href="@{/}" target="_blank">🌐 View site</a>
 </nav>
 </body>
 </html>

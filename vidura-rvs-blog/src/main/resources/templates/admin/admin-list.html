@@ -9,29 +9,53 @@
 
     <div class="admin-header-row">
         <h1 class="page-title">Verified admins</h1>
-        <a th:href="@{/admin/admins/new}" class="button">Invite a new admin</a>
+        <a th:href="@{/admin/admins/new}" class="button">👤 Invite a new admin</a>
     </div>
 
     <p class="form-success" th:if="${successMessage}" th:text="${successMessage}"></p>
 
     <table class="admin-table">
         <thead>
-        <tr><th>Name</th><th>Username</th><th>Email</th><th>Role</th><th>Status</th><th>Actions</th></tr>
+        <tr><th></th><th>Name</th><th>Username</th><th>Email</th><th>Role</th><th>Status</th><th>Actions</th></tr>
         </thead>
         <tbody>
         <tr th:each="admin : ${admins}">
-            <td th:text="${admin.fullName}">Name</td>
+            <td style="width:44px;">
+                <!-- Profile photo or initials -->
+                <img th:if="${admin.hasProfilePicture() and !admin.profilePicturePath.startsWith('static-img/')}"
+                     th:src="@{'/uploads/' + ${admin.profilePicturePath}}"
+                     class="user-row-photo" th:alt="${admin.fullName}"/>
+                <img th:if="${admin.hasProfilePicture() and admin.profilePicturePath.startsWith('static-img/')}"
+                     th:src="@{'/' + ${admin.profilePicturePath}}"
+                     class="user-row-photo" th:alt="${admin.fullName}"/>
+                <span th:unless="${admin.hasProfilePicture()}"
+                      class="user-row-initials"
+                      th:text="${#strings.substring(admin.fullName, 0, 1)}">V</span>
+            </td>
+            <td>
+                <a th:href="@{'/author/' + ${admin.username}}" th:text="${admin.fullName}"
+                   style="color:var(--ink);font-weight:500;" target="_blank">Name</a>
+            </td>
             <td th:text="${admin.username}">username</td>
             <td th:text="${admin.email}">email</td>
-            <td th:text="${admin.role}">Role</td>
-            <td th:text="${admin.active} ? 'Active' : 'Revoked'">Status</td>
+            <td>
+                <span class="status-badge published" th:if="${admin.isSuperAdmin()}">👑 Owner</span>
+                <span th:unless="${admin.isSuperAdmin()}" style="color:var(--ink-muted);font-size:0.85rem;">Admin</span>
+            </td>
+            <td>
+                <span class="status-badge"
+                      th:classappend="${admin.active} ? 'published' : 'draft'"
+                      th:text="${admin.active} ? '● Active' : '○ Revoked'">Status</span>
+            </td>
             <td class="row-actions">
                 <form th:unless="${admin.isSuperAdmin()}"
                       th:action="@{'/admin/admins/' + ${admin.id} + (${admin.active} ? '/deactivate' : '/activate')}"
                       method="post" class="inline-form">
-                    <button type="submit" class="link-button" th:text="${admin.active} ? 'Revoke access' : 'Restore access'"></button>
+                    <button type="submit" class="link-button"
+                            th:classappend="${admin.active} ? 'danger' : ''"
+                            th:text="${admin.active} ? 'Revoke access' : 'Restore access'"></button>
                 </form>
-                <span th:if="${admin.isSuperAdmin()}" class="muted">Owner</span>
+                <span th:if="${admin.isSuperAdmin()}" class="muted" style="font-size:0.85rem;">—</span>
             </td>
         </tr>
         </tbody>

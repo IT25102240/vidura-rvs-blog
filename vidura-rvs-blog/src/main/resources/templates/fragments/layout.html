@@ -4,21 +4,29 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title th:text="${title} + ' · ViduraRvs'">ViduraRvs</title>
+    <!-- Google Fonts: Inter + Playfair Display -->
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,700;0,800;1,700&display=swap" rel="stylesheet"/>
     <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <meta name="description" th:content="${metaDescription} ?: 'ViduraRvs — independent writing on technology, science, programming, and ideas shaping our world.'"/>
 </head>
 <body>
+
+<!-- Reading progress bar (shown on post detail pages) -->
+<div id="reading-progress"></div>
 
 <header class="site-header" th:fragment="header">
     <div class="container header-inner">
         <a class="brand" th:href="@{/}">
             <span class="brand-mark">V</span>
-            <span class="brand-name">ViduraRvs</span>
+            <span class="brand-name">Vidura<span>Rvs</span></span>
         </a>
 
         <form class="search-form" th:action="@{/search}" method="get">
-            <input type="search" name="q" placeholder="Search technology, science, travel..."
-                   th:value="${query}" aria-label="Search articles"/>
-            <button type="submit">Search</button>
+            <input type="search" name="q" placeholder="Search posts…"
+                   th:value="${query}" aria-label="Search articles" id="search-input"/>
+            <button type="submit" aria-label="Search">🔍</button>
         </form>
 
         <nav class="top-nav">
@@ -41,13 +49,30 @@
 
 <footer class="site-footer" th:fragment="footer">
     <div class="container footer-inner">
-        <p>
-            <strong>ViduraRvs</strong> &mdash; independent writing on technology, science, travel,
-            gaming, food, education, philosophy and the ideas shaping today's world.
+        <div>
+            <p class="footer-brand">Vidura<span>Rvs</span></p>
+            <p class="footer-tagline">Independent writing on technology, science, programming &amp; the ideas shaping today's world.</p>
+        </div>
+        <div class="footer-links">
+            <a th:href="@{/}">Home</a>
+            <a th:href="@{/about}">About</a>
+            <a th:href="@{/category/technology}">Technology</a>
+            <a th:href="@{/category/programming}">Programming</a>
+        </div>
+        <p class="footer-copy">
+            &copy; 2026 ViduraRvs &mdash; Built with Spring Boot, MySQL &amp; a lot of curiosity.
+            Hosted on Oracle Cloud Free Tier.
         </p>
-        <p class="muted">Built with Spring Boot, MySQL and a lot of curiosity.</p>
     </div>
 </footer>
+
+<!-- Lightbox (rendered once, shared across all pages) -->
+<div id="lightbox" class="lightbox" role="dialog" aria-label="Image lightbox">
+    <button id="lightbox-close" class="lightbox-close" aria-label="Close">&times;</button>
+    <img id="lightbox-img" src="" alt=""/>
+</div>
+
+<script th:src="@{/js/main.js}" defer></script>
 
 </body>
 </html>

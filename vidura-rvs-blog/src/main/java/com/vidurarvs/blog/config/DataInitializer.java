@@ -18,6 +18,9 @@ import java.util.List;
  * SUPER_ADMIN (owner) account from application.properties, but only if
  * the database is empty. Safe to leave in place - it never overwrites
  * existing data.
+ *
+ * Also ensures the super-admin has a profile picture path set (pointing
+ * to the bundled static image) so the profile displays correctly.
  */
 @Component
 public class DataInitializer implements CommandLineRunner {
@@ -63,6 +66,7 @@ public class DataInitializer implements CommandLineRunner {
     public void run(String... args) {
         seedCategories();
         seedSuperAdmin();
+        ensureSuperAdminPhoto();
     }
 
     private void seedCategories() {
@@ -84,6 +88,10 @@ public class DataInitializer implements CommandLineRunner {
         owner.setPassword(passwordEncoder.encode(superAdminPassword));
         owner.setRole(Role.SUPER_ADMIN);
         owner.setActive(true);
+        // Seed profile picture (bundled in static/img/)
+        owner.setProfilePicturePath("static-img/vidura-profile.jpg");
+        owner.setBio("Hi, I'm Vidura — IT student, tech enthusiast, and creator of ViduraRvs. " +
+                "I write about technology, programming, science, and ideas that shape our world.");
         userRepository.save(owner);
         System.out.println("=========================================================");
         System.out.println(" ViduraRvs: created your owner account.");
@@ -91,5 +99,22 @@ public class DataInitializer implements CommandLineRunner {
         System.out.println(" Log in at /login, then change the password immediately");
         System.out.println(" (edit application.properties before first run to set it).");
         System.out.println("=========================================================");
+    }
+
+    /**
+     * If the super-admin account already exists but has no profile picture
+     * (upgrade scenario), set the bundled static image as their photo.
+     */
+    private void ensureSuperAdminPhoto() {
+        userRepository.findByUsernameIgnoreCase(superAdminUsername).ifPresent(user -> {
+            if (!user.hasProfilePicture()) {
+                user.setProfilePicturePath("static-img/vidura-profile.jpg");
+                if (user.getBio() == null) {
+                    user.setBio("Hi, I'm Vidura — IT student, tech enthusiast, and creator of ViduraRvs. " +
+                            "I write about technology, programming, science, and ideas that shape our world.");
+                }
+                userRepository.save(user);
+            }
+        });
     }
 }
