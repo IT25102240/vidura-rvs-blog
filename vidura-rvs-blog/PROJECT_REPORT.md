@@ -457,8 +457,8 @@ or file-backed version) could be substituted without rewriting any controller.
 
 ```sql
 CREATE DATABASE vidurarvs_blog CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER 'vidura_blog'@'localhost' IDENTIFIED BY '<your-password>';
-GRANT ALL PRIVILEGES ON vidurarvs_blog.* TO 'vidura_blog'@'localhost';
+CREATE USER 'vidurarvs_blog'@'localhost' IDENTIFIED BY '<your-password>';
+GRANT ALL PRIVILEGES ON vidurarvs_blog.* TO 'vidurarvs_blog'@'localhost';
 FLUSH PRIVILEGES;
 ```
 
@@ -478,36 +478,13 @@ ssh -i <your-private-key-path> ubuntu@<your-oracle-public-ip>
 
 Open MySQL:
 ```bash
-sudo mysql -u vidura_blog -p vidurarvs_blog
+sudo mysql -u root -p vidurarvs_blog
 ```
 
-Paste and run:
-```sql
--- Add profile fields to users
-ALTER TABLE users
-  ADD COLUMN IF NOT EXISTS profile_picture_path VARCHAR(300) NULL,
-  ADD COLUMN IF NOT EXISTS bio TEXT NULL;
-
--- Create post_images table for multi-image support (up to 5 per post)
-CREATE TABLE IF NOT EXISTS post_images (
-    id           BIGINT       NOT NULL AUTO_INCREMENT,
-    post_id      BIGINT       NOT NULL,
-    image_path   VARCHAR(300) NOT NULL,
-    sort_order   INT          NOT NULL DEFAULT 0,
-    caption      VARCHAR(200) NULL,
-    PRIMARY KEY (id),
-    CONSTRAINT fk_post_images_post
-        FOREIGN KEY (post_id) REFERENCES posts (id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Performance indexes
-CREATE INDEX IF NOT EXISTS idx_posts_published_created
-    ON posts (published, created_at DESC);
-
-CREATE INDEX IF NOT EXISTS idx_posts_author
-    ON posts (author_id);
-
-EXIT;
+Run the migration script:
+```bash
+# Or directly pipe the script:
+sudo mysql -u root -p vidurarvs_blog < /opt/vidurarvs/app/vidura-rvs-blog/src/main/resources/db-migration.sql
 ```
 
 ---
@@ -581,9 +558,9 @@ sudo nano /etc/vidurarvs/vidurarvs.env
 Paste the following, replacing every `<...>` with your real values:
 
 ```
-# Database — matches the MySQL user you already created
-SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/vidurarvs_blog?useSSL=false&serverTimezone=UTC&characterEncoding=utf8mb4
-SPRING_DATASOURCE_USERNAME=vidura_blog
+# Database — matches the MySQL user you created on your VM
+SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/vidurarvs_blog?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=UTF-8
+SPRING_DATASOURCE_USERNAME=vidurarvs_blog
 SPRING_DATASOURCE_PASSWORD=<your-db-password-you-chose>
 
 # JPA
