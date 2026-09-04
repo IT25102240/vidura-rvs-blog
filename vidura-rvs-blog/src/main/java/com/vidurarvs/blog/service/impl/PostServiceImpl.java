@@ -33,6 +33,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
+@SuppressWarnings("null")
 public class PostServiceImpl implements PostService {
 
     private static final int MAX_IMAGES = 5;
