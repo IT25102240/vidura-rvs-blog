@@ -84,7 +84,7 @@ public class PostServiceImpl implements PostService {
     @Transactional
     public Post findPublishedBySlugAndRecordView(String slug) {
         Post post = postRepository.findBySlug(slug)
-                .filter(Post::isPublished)
+                .filter(p -> p != null && p.isPublished())
                 .orElseThrow(() -> new ResourceNotFoundException("Post not found: " + slug));
         post.incrementViewCount();
         return postRepository.save(post);
@@ -108,6 +108,9 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public Post findByIdOrThrow(Long id) {
+        if (id == null) {
+            throw new ResourceNotFoundException("Post id cannot be null");
+        }
         return postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Post not found with id " + id));
     }
@@ -253,8 +256,8 @@ public class PostServiceImpl implements PostService {
     private String storeImage(MultipartFile file) {
         try {
             Files.createDirectories(uploadRoot);
-            String original = StringUtils.cleanPath(
-                    file.getOriginalFilename() == null ? "image" : file.getOriginalFilename());
+            String rawFilename = file.getOriginalFilename();
+            String original = StringUtils.cleanPath(rawFilename != null ? rawFilename : "image");
             String extension = "";
             int dot = original.lastIndexOf('.');
             if (dot >= 0) {

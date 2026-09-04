@@ -39,6 +39,9 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public Category findByIdOrThrow(Long id) {
+        if (id == null) {
+            throw new ResourceNotFoundException("Category id cannot be null");
+        }
         return categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found with id " + id));
     }
@@ -51,7 +54,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Transactional
     @CacheEvict(value = "navCategories", allEntries = true)
     public Category create(String name) {
-        String trimmed = name.trim();
+        String trimmed = (name != null ? name.trim() : "");
         if (categoryRepository.existsByNameIgnoreCase(trimmed)) {
             throw new DuplicateResourceException(
                     "A category named \"" + trimmed + "\" already exists.");

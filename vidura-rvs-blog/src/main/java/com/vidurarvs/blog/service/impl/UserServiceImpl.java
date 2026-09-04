@@ -45,6 +45,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User findByIdOrThrow(Long id) {
+        if (id == null) {
+            throw new ResourceNotFoundException("Admin id cannot be null");
+        }
         return userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Admin not found with id " + id));
     }
@@ -117,8 +120,8 @@ public class UserServiceImpl implements UserService {
     private String storeProfilePhoto(MultipartFile file) {
         try {
             Files.createDirectories(uploadRoot);
-            String original = StringUtils.cleanPath(
-                    file.getOriginalFilename() == null ? "photo" : file.getOriginalFilename());
+            String rawFilename = file.getOriginalFilename();
+            String original = StringUtils.cleanPath(rawFilename != null ? rawFilename : "photo");
             String ext = "";
             int dot = original.lastIndexOf('.');
             if (dot >= 0)
