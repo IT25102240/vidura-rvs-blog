@@ -5,6 +5,7 @@ import com.vidurarvs.blog.model.Category;
 import com.vidurarvs.blog.model.Post;
 import com.vidurarvs.blog.model.User;
 import org.springframework.data.domain.Page;
+import org.springframework.lang.NonNull;
 
 /**
  * All post business logic: publishing rules, search, view counting and
@@ -23,6 +24,7 @@ public interface PostService {
     Page<Post> search(String keyword, int page, int pageSize);
 
     /** Looks up a published post by slug and records a view. Throws if missing/unpublished. */
+    @NonNull
     Post findPublishedBySlugAndRecordView(String slug);
 
     Page<Post> relatedTo(Post post, int limit);
@@ -32,6 +34,7 @@ public interface PostService {
 
     Page<Post> findAllByAuthor(User author, int page, int pageSize);
 
+    @NonNull
     Post findByIdOrThrow(Long id);
 
     /**

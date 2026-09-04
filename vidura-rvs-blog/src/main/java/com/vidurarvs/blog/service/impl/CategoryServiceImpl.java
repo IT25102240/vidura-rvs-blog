@@ -9,6 +9,7 @@ import com.vidurarvs.blog.repository.PostRepository;
 import com.vidurarvs.blog.service.CategoryService;
 import com.vidurarvs.blog.util.SlugUtils;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,12 +33,14 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @NonNull
     public Category findBySlugOrThrow(String slug) {
         return categoryRepository.findBySlug(slug)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found: " + slug));
     }
 
     @Override
+    @NonNull
     public Category findByIdOrThrow(Long id) {
         if (id == null) {
             throw new ResourceNotFoundException("Category id cannot be null");

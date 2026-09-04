@@ -16,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -82,6 +83,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
+    @NonNull
     public Post findPublishedBySlugAndRecordView(String slug) {
         Post post = postRepository.findBySlug(slug)
                 .filter(p -> p != null && p.isPublished())
@@ -107,6 +109,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @NonNull
     public Post findByIdOrThrow(Long id) {
         if (id == null) {
             throw new ResourceNotFoundException("Post id cannot be null");

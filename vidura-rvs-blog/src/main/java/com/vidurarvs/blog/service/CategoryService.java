@@ -1,6 +1,7 @@
 package com.vidurarvs.blog.service;
 
 import com.vidurarvs.blog.model.Category;
+import org.springframework.lang.NonNull;
 
 import java.util.List;
 
@@ -9,8 +10,10 @@ public interface CategoryService {
 
     List<Category> findAll();
 
+    @NonNull
     Category findBySlugOrThrow(String slug);
 
+    @NonNull
     Category findByIdOrThrow(Long id);
 
     /**

@@ -9,6 +9,7 @@ import com.vidurarvs.blog.model.User;
 import com.vidurarvs.blog.repository.UserRepository;
 import com.vidurarvs.blog.service.UserService;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.lang.NonNull;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,6 +45,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @NonNull
     public User findByIdOrThrow(Long id) {
         if (id == null) {
             throw new ResourceNotFoundException("Admin id cannot be null");
@@ -53,6 +55,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @NonNull
     public User findByUsernameOrThrow(String username) {
         return userRepository.findByUsernameIgnoreCase(username)
                 .orElseThrow(() -> new ResourceNotFoundException("Admin not found: " + username));
