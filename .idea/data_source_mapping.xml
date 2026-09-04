@@ -2,5 +2,6 @@
 <project version="4">
   <component name="DataSourcePerFileMappings">
     <file url="file://$APPLICATION_CONFIG_DIR$/consoles/db/e0421afc-22de-443e-8200-9ae054dcb166/console.sql" value="e0421afc-22de-443e-8200-9ae054dcb166" />
+    <file url="file://$PROJECT_DIR$/vidura-rvs-blog/resources/db-migration.sql" value="e0421afc-22de-443e-8200-9ae054dcb166" />
   </component>
 </project>
